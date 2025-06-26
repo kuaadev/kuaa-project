@@ -17,6 +17,9 @@
             --kuaa-dark: #1D3557;
             --kuaa-light: #A8DADC;
             --kuaa-accent: #457B9D;
+            --player-bg: #2d3436;
+            --player-text: #dfe6e9;
+            --player-text-muted: #b2bec3;
         }
 
         body {
@@ -81,36 +84,86 @@
             font-size: 3.5rem;
         }
 
-        .now-playing-card {
-            background-color: rgba(29, 53, 87, 0.8);
-            border: 2px solid var(--kuaa-light);
-            border-radius: 1rem;
-            padding: 1.5rem;
-            backdrop-filter: blur(5px);
+        .player-container {
+            background-color: var(--player-bg);
+            color: var(--player-text);
+            border-radius: 1.5rem;
+            overflow: hidden;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
         }
 
-        .now-playing-card img {
-            width: 120px;
-            height: 120px;
+        .player-art-bg {
+            position: relative;
+            padding-top: 40%;
+            background-size: cover;
+            background-position: center center;
+        }
+
+        .player-art-bg::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to top, var(--player-bg) 0%, rgba(45, 52, 54, 0.7) 50%, var(--player-bg) 100%);
+        }
+
+        .player-art-fg {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50%;
+            max-width: 200px;
+            aspect-ratio: 1 / 1;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
             object-fit: cover;
-            flex-shrink: 0;
+            z-index: 2;
         }
 
-        #play-pause-btn {
+        .player-info {
+            padding: 1.5rem;
+            padding-top: 1rem;
+        }
+
+        .player-info .song-title {
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .player-info .artist-name {
+            font-weight: 400;
+            font-size: 1rem;
+        }
+
+        .player-info .album-name {
+            font-weight: 400;
+            font-size: 0.9rem;
+            color: var(--player-text-muted);
+        }
+
+        .player-controls button {
+            background: transparent;
+            border: none;
+            color: var(--player-text);
+            font-size: 1.5rem;
+            opacity: 0.8;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .player-controls button:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        .player-controls .play-btn {
             background-color: var(--kuaa-primary);
-            color: var(--kuaa-secondary);
             border-radius: 50%;
             width: 60px;
             height: 60px;
             font-size: 2rem;
-            line-height: 1;
-            border: none;
-            transition: all 0.2s ease-in-out;
-        }
-
-        #play-pause-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 0 15px var(--kuaa-primary);
         }
 
         .recent-spin-item img {
@@ -175,20 +228,21 @@
                             pride ourselves on specializing in musical, cultural, linguistic, and artistic diversity.
                             KUAA is an extension of and brought to you by Utah Arts Alliance.</p>
 
-                        <div id="listen-live-player" class="now-playing-card d-flex align-items-center p-3">
-                            <img id="now-playing-cover" src="https://placehold.co/120x120/1D3557/F1FAEE?text=KUAA"
-                                class="rounded shadow" alt="Album Art">
-                            <div class="ms-3 ms-md-4 text-start flex-grow-1">
-                                <h3 class="mb-1 small text-uppercase fw-bold">NOW PLAYING</h3>
-                                <h4 id="now-playing-show" class="text-light mb-1 fs-5">Loading Show...</h4>
-                                <p id="now-playing-dj" class="mb-2 small"><em>Loading DJ...</em></p>
-                                <p id="now-playing-song" class="mb-0 fw-bold">Loading Song...</p>
-                                <p id="now-playing-artist" class="mb-0 small">Loading Artist...</p>
+                        <div class="player-container text-center">
+                            <div id="player-art-bg" class="player-art-bg">
+                                <img id="player-art-fg" src="https://placehold.co/200/2d3436/dfe6e9?text=KUAA"
+                                    alt="Album Art" class="player-art-fg">
                             </div>
-                            <div class="ms-3 ms-md-4">
-                                <button id="play-pause-btn" class="d-flex align-items-center justify-content-center">
-                                    <i id="play-pause-icon" class="bi bi-play-fill"></i>
-                                </button>
+                            <div class="player-info">
+                                <p id="player-song" class="song-title mb-0">Loading Song...</p>
+                                <p id="player-artist" class="artist-name mb-1">Loading Artist...</p>
+                                <p id="player-album" class="album-name mb-3">Loading Album...</p>
+                                <div class="player-controls d-flex justify-content-center align-items-center">
+                                    <button class="mx-3"><i class="bi bi-volume-up"></i></button>
+                                    <button id="play-pause-btn" class="play-btn mx-3"><i id="play-pause-icon"
+                                            class="bi bi-play-fill"></i></button>
+                                    <button class="mx-3"><i class="bi bi-heart"></i></button>
+                                </div>
                             </div>
                         </div>
 
@@ -332,11 +386,11 @@
 
             // --- NOW PLAYING ---
             const nowPlayingApiUrl = `/.netlify/functions/get-now-playing`;
-            const showElement = document.getElementById('now-playing-show');
-            const djElement = document.getElementById('now-playing-dj');
-            const songElement = document.getElementById('now-playing-song');
-            const artistElement = document.getElementById('now-playing-artist');
-            const coverElement = document.getElementById('now-playing-cover');
+            const playerSong = document.getElementById('player-song');
+            const playerArtist = document.getElementById('player-artist');
+            const playerAlbum = document.getElementById('player-album');
+            const playerArtBg = document.getElementById('player-art-bg');
+            const playerArtFg = document.getElementById('player-art-fg');
 
             const fetchNowPlaying = async () => {
                 try {
@@ -346,30 +400,31 @@
 
                     if (data.items && data.items.length > 0) {
                         const latestSpin = data.items[0];
-                        const showName = latestSpin.show ? latestSpin.show.title : 'Community Programming';
-                        const djName = (latestSpin.show && latestSpin.show.personas && latestSpin.show.personas.length > 0)
-                            ? latestSpin.show.personas.map(p => p.name).join(' & ')
-                            : 'KUAA';
 
-                        showElement.textContent = showName;
-                        djElement.innerHTML = `with <em>${djName}</em>`;
-                        songElement.textContent = latestSpin.song || 'Music Variety';
-                        artistElement.textContent = latestSpin.artist || 'Various Artists';
+                        playerSong.textContent = latestSpin.song || 'Music Variety';
+                        playerArtist.textContent = latestSpin.artist || 'Various Artists';
+                        playerAlbum.textContent = latestSpin.release || 'KUAA';
 
-                        const imageUrl = latestSpin.image || 'https://placehold.co/120x120/1D3557/F1FAEE?text=KUAA';
-                        if (coverElement.src !== imageUrl) {
-                            coverElement.src = imageUrl;
+                        const imageUrl = latestSpin.image || 'https://placehold.co/200/2d3436/dfe6e9?text=KUAA';
+                        if (playerArtFg.src !== imageUrl) {
+                            playerArtFg.src = imageUrl;
+                            playerArtBg.style.backgroundImage = `url(${imageUrl})`;
                         }
 
                     } else {
-                        showElement.textContent = 'Community Programming';
-                        djElement.innerHTML = 'with <em>KUAA</em>';
-                        songElement.textContent = 'Music for the People';
-                        artistElement.textContent = 'Various Artists';
-                        coverElement.src = 'https://placehold.co/120x120/1D3557/F1FAEE?text=KUAA';
+                        playerSong.textContent = 'Community Programming';
+                        playerArtist.textContent = 'KUAA';
+                        playerAlbum.textContent = 'Salt Lake City';
+                        playerArtFg.src = 'https://placehold.co/200/2d3436/dfe6e9?text=KUAA';
+                        playerArtBg.style.backgroundImage = 'none';
                     }
                 } catch (error) {
                     console.error("Error fetching Now Playing data:", error);
+                    playerSong.textContent = 'On Air';
+                    playerArtist.textContent = 'Could not load current song info.';
+                    playerAlbum.textContent = 'Please check back shortly.';
+                    playerArtFg.src = 'https://placehold.co/200/2d3436/dfe6e9?text=Error';
+                    playerArtBg.style.backgroundImage = 'none';
                 }
             };
 
@@ -384,7 +439,6 @@
                     const data = await response.json();
 
                     if (data.items && data.items.length > 1) {
-                        // The first item is now playing, so we skip it.
                         const recent = data.items.slice(1);
                         let recentHtml = '';
                         recent.forEach(spin => {
@@ -477,8 +531,8 @@
             fetchNowPlaying();
             fetchRecentSpins();
             fetchSchedule();
-            setInterval(fetchNowPlaying, 20000); // Now Playing updates frequently
-            setInterval(fetchRecentSpins, 60000); // Recent spins can update less often
+            setInterval(fetchNowPlaying, 20000);
+            setInterval(fetchRecentSpins, 60000);
 
             // --- Set Today's Tab as Active ---
             const todayIndex = new Date().getDay();
@@ -500,5 +554,3 @@
         });
     </script>
 </body>
-
-</html>
