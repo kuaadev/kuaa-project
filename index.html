@@ -169,7 +169,8 @@
                         <p class="lead mb-5">KUAA 99.9 FM is a low powered FM community radio station broadcasting
                             terrestrially in Salt Lake City at 99.9FM, and streaming around the world at kuaafm.org. We
                             pride ourselves on specializing in musical, cultural, linguistic, and artistic diversity.
-                            KUAA is an extension of and brought to you by Utah Arts Alliance.</p>
+                            KUAA is an extension of and brought to you by Utah Arts Alliance.
+                            station.</p>
                         <div class="now-playing-card">
                             <h3 class="mb-3">ON AIR NOW</h3>
                             <h4 id="now-playing-show" class="text-light">Loading Show...</h4>
@@ -180,7 +181,91 @@
                 </div>
             </div>
         </section>
-        <!-- The rest of the page sections (Listen Live, Schedule, etc.) go here -->
+
+        <section id="listen-live" class="py-5">
+            <div class="container text-center">
+                <h2 class="section-title">Listen Live</h2>
+                <p class="lead mb-4">Tune in to KUAA 99.9 FM right now!</p>
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <div class="p-4 bg-dark rounded-3 shadow-lg">
+                            <audio controls class="w-100" id="audio-player">
+                                <source src="https://kuaa.streambonix.com/stream" type="audio/mpeg">
+                                Your browser does not support the audio element.
+                            </audio>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="schedule" class="py-5 bg-light">
+            <div class="container">
+                <h2 class="section-title text-center">Program Schedule</h2>
+                <ul class="nav nav-pills justify-content-center mb-4" id="schedule-tabs" role="tablist">
+                    <li class="nav-item" role="presentation"><button class="nav-link" id="sunday-tab"
+                            data-bs-toggle="tab" data-bs-target="#sunday" type="button" role="tab">Sun</button></li>
+                    <li class="nav-item" role="presentation"><button class="nav-link active" id="monday-tab"
+                            data-bs-toggle="tab" data-bs-target="#monday" type="button" role="tab">Mon</button></li>
+                    <li class="nav-item" role="presentation"><button class="nav-link" id="tuesday-tab"
+                            data-bs-toggle="tab" data-bs-target="#tuesday" type="button" role="tab">Tue</button></li>
+                    <li class="nav-item" role="presentation"><button class="nav-link" id="wednesday-tab"
+                            data-bs-toggle="tab" data-bs-target="#wednesday" type="button" role="tab">Wed</button></li>
+                    <li class="nav-item" role="presentation"><button class="nav-link" id="thursday-tab"
+                            data-bs-toggle="tab" data-bs-target="#thursday" type="button" role="tab">Thu</button></li>
+                    <li class="nav-item" role="presentation"><button class="nav-link" id="friday-tab"
+                            data-bs-toggle="tab" data-bs-target="#friday" type="button" role="tab">Fri</button></li>
+                    <li class="nav-item" role="presentation"><button class="nav-link" id="saturday-tab"
+                            data-bs-toggle="tab" data-bs-target="#saturday" type="button" role="tab">Sat</button></li>
+                </ul>
+                <div class="tab-content" id="schedule-content">
+                    <div class="tab-pane fade" id="sunday" role="tabpanel">
+                        <div class="text-center p-3">
+                            <div class="spinner-border text-primary" role="status"><span
+                                    class="visually-hidden">Loading...</span></div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade show active" id="monday" role="tabpanel">
+                        <div class="text-center p-3">
+                            <div class="spinner-border text-primary" role="status"><span
+                                    class="visually-hidden">Loading...</span></div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="tuesday" role="tabpanel">
+                        <div class="text-center p-3">
+                            <div class="spinner-border text-primary" role="status"><span
+                                    class="visually-hidden">Loading...</span></div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="wednesday" role="tabpanel">
+                        <div class="text-center p-3">
+                            <div class="spinner-border text-primary" role="status"><span
+                                    class="visually-hidden">Loading...</span></div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="thursday" role="tabpanel">
+                        <div class="text-center p-3">
+                            <div class="spinner-border text-primary" role="status"><span
+                                    class="visually-hidden">Loading...</span></div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="friday" role="tabpanel">
+                        <div class="text-center p-3">
+                            <div class="spinner-border text-primary" role="status"><span
+                                    class="visually-hidden">Loading...</span></div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="saturday" role="tabpanel">
+                        <div class="text-center p-3">
+                            <div class="spinner-border text-primary" role="status"><span
+                                    class="visually-hidden">Loading...</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- The rest of the page sections (Shows, About, etc.) go here -->
     </main>
     <footer class="footer py-4">
         <div class="container text-center">
@@ -196,6 +281,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // --- NOW PLAYING ---
             const nowPlayingApiUrl = `/.netlify/functions/get-now-playing`;
             const showElement = document.getElementById('now-playing-show');
             const djElement = document.getElementById('now-playing-dj');
@@ -203,20 +289,14 @@
             const fetchNowPlaying = async () => {
                 try {
                     const response = await fetch(nowPlayingApiUrl);
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                     const data = await response.json();
                     if (data.items && data.items.length > 0) {
                         const latestSpin = data.items[0];
-
-                        // Check if playlist exists before trying to access its properties
                         const showName = latestSpin.playlist ? latestSpin.playlist.title : 'Community Programming';
                         const djName = latestSpin.playlist ? latestSpin.playlist.dj_name : 'KUAA';
-
                         const songTitle = latestSpin.song || 'Music Variety';
                         const artistName = latestSpin.artist || 'Various Artists';
-
                         showElement.textContent = showName;
                         djElement.innerHTML = `<i class="bi bi-mic-fill"></i> with ${djName}`;
                         songElement.innerHTML = `<i class="bi bi-music-note-beamed"></i> "${songTitle}" by ${artistName}`;
@@ -234,12 +314,87 @@
             };
             fetchNowPlaying();
             setInterval(fetchNowPlaying, 20000);
-        });
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                if (this.getAttribute('data-bs-toggle') === 'tab') { return; }
-                e.preventDefault();
-                document.querySelector(this.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
+
+            // --- SCHEDULE ---
+            const scheduleApiUrl = `/.netlify/functions/get-schedule`;
+            const formatTime = (dateStr) => {
+                const date = new Date(dateStr);
+                let hours = date.getHours();
+                const minutes = date.getMinutes();
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                hours %= 12;
+                hours = hours || 12; // the hour '0' should be '12'
+                return `${hours}:${minutes < 10 ? '0' + minutes : minutes} ${ampm}`;
+            };
+            const fetchSchedule = async () => {
+                try {
+                    const response = await fetch(scheduleApiUrl);
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    const scheduleData = await response.json();
+                    const shows = scheduleData.items;
+
+                    const showsByDay = { 0: [], 1: [], 2: [], 3: [], 4: [], 5: [], 6: [] };
+                    shows.forEach(show => {
+                        const showDate = new Date(show.start);
+                        const dayOfWeek = showDate.getUTCDay(); // Use UTC day to be consistent
+                        showsByDay[dayOfWeek].push(show);
+                    });
+
+                    for (const day in showsByDay) {
+                        showsByDay[day].sort((a, b) => new Date(a.start) - new Date(b.start));
+                    }
+
+                    renderSchedule(showsByDay);
+
+                } catch (error) {
+                    console.error("Error fetching schedule:", error);
+                    // Optionally display an error in the schedule tabs
+                }
+            };
+            const renderSchedule = (showsByDay) => {
+                const dayMap = { 0: 'sunday', 1: 'monday', 2: 'tuesday', 3: 'wednesday', 4: 'thursday', 5: 'friday', 6: 'saturday' };
+                for (const dayIndex in dayMap) {
+                    const dayName = dayMap[dayIndex];
+                    const container = document.getElementById(dayName);
+                    const dayShows = showsByDay[dayIndex];
+
+                    if (!container) continue;
+
+                    if (dayShows.length === 0) {
+                        container.innerHTML = '<p class="text-center p-3">No shows scheduled for today.</p>';
+                    } else {
+                        let tableHTML = `<table class="table table-striped table-hover">
+                            <thead class="table-dark"><tr><th>Time</th><th>Show</th><th>DJ/Host</th></tr></thead><tbody>`;
+                        dayShows.forEach(show => {
+                            tableHTML += `<tr>
+                                <td>${formatTime(show.start)} - ${formatTime(show.end)}</td>
+                                <td>${show.title || 'Untitled Show'}</td>
+                                <td>${show.dj_name || 'KUAA'}</td>
+                            </tr>`;
+                        });
+                        tableHTML += `</tbody></table>`;
+                        container.innerHTML = tableHTML;
+                    }
+                }
+            };
+            fetchSchedule();
+
+            // --- Set Today's Tab as Active ---
+            const todayIndex = new Date().getDay();
+            const dayMap = { 0: 'sunday', 1: 'monday', 2: 'tuesday', 3: 'wednesday', 4: 'thursday', 5: 'friday', 6: 'saturday' };
+            const todayTab = document.getElementById(`${dayMap[todayIndex]}-tab`);
+            if (todayTab) {
+                const tab = new bootstrap.Tab(todayTab);
+                tab.show();
+            }
+
+            // --- SMOOTH SCROLL ---
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    if (this.getAttribute('data-bs-toggle') === 'tab') return;
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
+                });
             });
         });
     </script>
