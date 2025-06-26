@@ -97,6 +97,23 @@
             /* Prevents image from shrinking */
         }
 
+        #play-pause-btn {
+            background-color: var(--kuaa-primary);
+            color: var(--kuaa-secondary);
+            border-radius: 50%;
+            width: 70px;
+            height: 70px;
+            font-size: 2.5rem;
+            line-height: 1;
+            border: none;
+            transition: all 0.2s ease-in-out;
+        }
+
+        #play-pause-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px var(--kuaa-primary);
+        }
+
         .schedule .nav-link {
             color: var(--kuaa-accent);
             font-weight: 700;
@@ -111,40 +128,15 @@
             border-radius: 0.5rem;
             overflow: hidden;
         }
-
-        .card {
-            border: none;
-            border-radius: 1rem;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease-in-out;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-        }
-
-        .card-img-top {
-            border-top-left-radius: 1rem;
-            border-top-right-radius: 1rem;
-        }
-
-        .footer {
-            background-color: var(--kuaa-dark);
-            color: var(--kuaa-secondary);
-        }
-
-        .footer a {
-            color: var(--kuaa-light);
-            text-decoration: none;
-        }
-
-        .footer a:hover {
-            color: var(--kuaa-secondary);
-        }
     </style>
 </head>
 
 <body>
+    <!-- Hidden Audio Player -->
+    <audio id="audio-player" preload="auto">
+        <source src="https://stream.xmission.com/kuaa" type="audio/mpeg">
+    </audio>
+
     <header>
         <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
             <div class="container">
@@ -155,13 +147,10 @@
                     <ul class="navbar-nav ms-auto align-items-center">
                         <li class="nav-item"><a class="nav-link" href="#home">Home</a></li>
                         <li class="nav-item"><a class="nav-link" href="#schedule">Schedule</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#shows">Shows</a></li>
                         <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#involved">Get Involved</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#community">Community</a></li>
                         <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
-                        <li class="nav-item ms-lg-2 mt-2 mt-lg-0"><a class="btn btn-danger btn-lg"
-                                href="#listen-live"><i class="bi bi-broadcast-pin"></i> Listen Live</a></li>
+                        <li class="nav-item ms-lg-2 mt-2 mt-lg-0"><a class="btn btn-danger btn-lg" href="#home"><i
+                                    class="bi bi-broadcast-pin"></i> Listen Live</a></li>
                     </ul>
                 </div>
             </div>
@@ -178,34 +167,22 @@
                             pride ourselves on specializing in musical, cultural, linguistic, and artistic diversity.
                             KUAA is an extension of and brought to you by Utah Arts Alliance.</p>
 
-                        <div class="now-playing-card d-flex align-items-center p-3">
+                        <div id="listen-live" class="now-playing-card d-flex align-items-center p-3">
                             <img id="now-playing-cover" src="https://placehold.co/150x150/1D3557/F1FAEE?text=KUAA"
                                 class="rounded shadow" alt="Album Art">
-                            <div class="ms-4 text-start flex-grow-1">
+                            <div class="ms-3 ms-md-4 text-start flex-grow-1">
                                 <h3 class="mb-1 small text-uppercase">ON AIR NOW</h3>
                                 <h4 id="now-playing-show" class="text-light mb-2">Loading Show...</h4>
                                 <p id="now-playing-song" class="mb-0 fs-5 fw-bold">Loading Song...</p>
                                 <p id="now-playing-artist" class="mb-0">Loading Artist...</p>
                             </div>
+                            <div class="ms-3 ms-md-4">
+                                <button id="play-pause-btn" class="d-flex align-items-center justify-content-center">
+                                    <i id="play-pause-icon" class="bi bi-play-fill"></i>
+                                </button>
+                            </div>
                         </div>
 
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="listen-live" class="py-5">
-            <div class="container text-center">
-                <h2 class="section-title">Listen Live</h2>
-                <p class="lead mb-4">Tune in to KUAA 99.9 FM right now!</p>
-                <div class="row justify-content-center">
-                    <div class="col-lg-8">
-                        <div class="p-4 bg-dark rounded-3 shadow-lg">
-                            <audio controls class="w-100" id="audio-player">
-                                <source src="https://stream.xmission.com/kuaa" preload="auto">
-                                Your browser does not support the audio element.
-                            </audio>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -277,7 +254,7 @@
             </div>
         </section>
 
-        <!-- The rest of the page sections (Shows, About, etc.) go here -->
+        <!-- The rest of the page sections (About, etc.) go here -->
     </main>
     <footer class="footer py-4">
         <div class="container text-center">
@@ -293,6 +270,22 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            const audioPlayer = document.getElementById('audio-player');
+            const playPauseBtn = document.getElementById('play-pause-btn');
+            const playPauseIcon = document.getElementById('play-pause-icon');
+
+            playPauseBtn.addEventListener('click', () => {
+                if (audioPlayer.paused) {
+                    audioPlayer.play();
+                    playPauseIcon.classList.remove('bi-play-fill');
+                    playPauseIcon.classList.add('bi-pause-fill');
+                } else {
+                    audioPlayer.pause();
+                    playPauseIcon.classList.remove('bi-pause-fill');
+                    playPauseIcon.classList.add('bi-play-fill');
+                }
+            });
+
             // --- NOW PLAYING ---
             const nowPlayingApiUrl = `/.netlify/functions/get-now-playing`;
             const showElement = document.getElementById('now-playing-show');
@@ -356,7 +349,7 @@
                     const showsByDay = { 0: [], 1: [], 2: [], 3: [], 4: [], 5: [], 6: [] };
                     shows.forEach(show => {
                         const showDate = new Date(show.start);
-                        const dayOfWeek = showDate.getUTCDay(); // Use UTC day to be consistent
+                        const dayOfWeek = showDate.getUTCDay();
                         showsByDay[dayOfWeek].push(show);
                     });
 
@@ -368,7 +361,6 @@
 
                 } catch (error) {
                     console.error("Error fetching schedule:", error);
-                    // Optionally display an error in the schedule tabs
                 }
             };
             const renderSchedule = (showsByDay) => {
