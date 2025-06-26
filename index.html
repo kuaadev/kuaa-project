@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KUAA 99.9 FM - Salt Lake City Community Radio</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --kuaa-primary: #E63946;
+            --kuaa-secondary: #F1FAEE;
+            --kuaa-dark: #1D3557;
+            --kuaa-light: #A8DADC;
+            --kuaa-accent: #457B9D;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--kuaa-secondary);
+            color: var(--kuaa-dark);
+        }
+
+        .navbar {
+            background-color: rgba(29, 53, 87, 0.95);
+            backdrop-filter: blur(10px);
+        }
+
+        .navbar-brand {
+            font-weight: 900;
+            font-size: 1.8rem;
+        }
+
+        .nav-link {
+            font-weight: 700;
+        }
+
+        .btn-danger {
+            background-color: var(--kuaa-primary);
+            border-color: var(--kuaa-primary);
+        }
+
+        .btn-danger:hover {
+            background-color: #c42d39;
+            border-color: #c42d39;
+        }
+
+        .section-title {
+            font-weight: 900;
+            color: var(--kuaa-dark);
+            position: relative;
+            display: inline-block;
+            padding-bottom: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50%;
+            height: 4px;
+            background-color: var(--kuaa-primary);
+            border-radius: 2px;
+        }
+
+        .hero {
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url('https://placehold.co/1920x1080/1D3557/F1FAEE?text=KUAA+Broadcast') no-repeat center center;
+            background-size: cover;
+            color: var(--kuaa-secondary);
+            padding: 8rem 0;
+        }
+
+        .hero h1 {
+            font-weight: 900;
+            font-size: 3.5rem;
+        }
+
+        .now-playing-card {
+            background-color: rgba(29, 53, 87, 0.8);
+            border: 2px solid var(--kuaa-light);
+            border-radius: 1rem;
+            padding: 2rem;
+            backdrop-filter: blur(5px);
+            min-height: 200px;
+            /* Ensure consistent size */
+        }
+
+        .schedule .nav-link {
+            color: var(--kuaa-accent);
+            font-weight: 700;
+        }
+
+        .schedule .nav-link.active {
+            background-color: var(--kuaa-accent) !important;
+            color: var(--kuaa-secondary) !important;
+        }
+
+        .schedule .table {
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        .card {
+            border: none;
+            border-radius: 1rem;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-img-top {
+            border-top-left-radius: 1rem;
+            border-top-right-radius: 1rem;
+        }
+
+        .footer {
+            background-color: var(--kuaa-dark);
+            color: var(--kuaa-secondary);
+        }
+
+        .footer a {
+            color: var(--kuaa-light);
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            color: var(--kuaa-secondary);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Header & Navigation -->
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+            <div class="container">
+                <a class="navbar-brand" href="#">KUAA 99.9FM</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto align-items-center">
+                        <li class="nav-item"><a class="nav-link" href="#home">Home</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#schedule">Schedule</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#shows">Shows</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#involved">Get Involved</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#community">Community</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+                        <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
+                            <a class="btn btn-danger btn-lg" href="#listen-live">
+                                <i class="bi bi-broadcast-pin"></i> Listen Live
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+
+        <!-- Home / Hero Section -->
+        <section id="home" class="hero text-center">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-lg-10">
+                        <h1 class="display-4 mb-4">Musical, Cultural, Linguistic, and Artistic Diversity</h1>
+                        <p class="lead mb-5">Broadcasting from Salt Lake City to the world. Your community-powered radio
+                            station.
+                        </p>
+                        <div class="now-playing-card">
+                            <h3 class="mb-3">ON AIR NOW</h3>
+                            <h4 id="now-playing-show" class="text-light">Loading Show...</h4>
+                            <p id="now-playing-dj" class="mb-1"><i class="bi bi-mic-fill"></i> Loading DJ...</p>
+                            <p id="now-playing-song"><i class="bi bi-music-note-beamed"></i> Loading Song...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Listen Live Section -->
+        <section id="listen-live" class="py-5">
+            <div class="container text-center">
+                <h2 class="section-title">Listen Live</h2>
+                <p class="lead mb-4">Tune in to KUAA 99.9 FM right now!</p>
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <div class="p-4 bg-dark rounded-3 shadow-lg">
+                            <!-- Live audio player -->
+                            <audio controls class="w-100" id="audio-player">
+                                <source src="https://kuaa.streambonix.com/stream" type="audio/mpeg">
+                                Your browser does not support the audio element.
+                            </audio>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Schedule Section -->
+        <section id="schedule" class="py-5 bg-light">
+            <div class="container">
+                <h2 class="section-title text-center">Program Schedule</h2>
+                <ul class="nav nav-pills justify-content-center mb-4" id="schedule-tabs" role="tablist">
+                    <li class="nav-item" role="presentation"><button class="nav-link active" id="monday-tab"
+                            data-bs-toggle="tab" data-bs-target="#monday" type="button" role="tab">Mon</button></li>
+                    <li class="nav-item" role="presentation"><button class="nav-link" id="tuesday-tab"
+                            data-bs-toggle="tab" data-bs-target="#tuesday" type="button" role="tab">Tue</button></li>
+                    <li class="nav-item" role="presentation"><button class="nav-link" id="wednesday-tab"
+                            data-bs-toggle="tab" data-bs-target="#wednesday" type="button" role="tab">Wed</button></li>
+                    <li class="nav-item" role="presentation"><button class="nav-link" id="thursday-tab"
+                            data-bs-toggle="tab" data-bs-target="#thursday" type="button" role="tab">Thu</button></li>
+                    <li class="nav-item" role="presentation"><button class="nav-link" id="friday-tab"
+                            data-bs-toggle="tab" data-bs-target="#friday" type="button" role="tab">Fri</button></li>
+                    <li class="nav-item" role="presentation"><button class="nav-link" id="saturday-tab"
+                            data-bs-toggle="tab" data-bs-target="#saturday" type="button" role="tab">Sat</button></li>
+                    <li class="nav-item" role="presentation"><button class="nav-link" id="sunday-tab"
+                            data-bs-toggle="tab" data-bs-target="#sunday" type="button" role="tab">Sun</button></li>
+                </ul>
+                <div class="tab-content" id="schedule-content">
+                    <!-- Monday -->
+                    <div class="tab-pane fade show active" id="monday" role="tabpanel">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Show</th>
+                                    <th>DJ/Host</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>8:00 AM - 10:00 AM</td>
+                                    <td>Morning Commute</td>
+                                    <td>DJ Jazzy</td>
+                                </tr>
+                                <tr>
+                                    <td>10:00 AM - 12:00 PM</td>
+                                    <td>Midday Mix</td>
+                                    <td>Various</td>
+                                </tr>
+                                <tr>
+                                    <td>12:00 PM - 2:00 PM</td>
+                                    <td>Latin Vibes</td>
+                                    <td>Elena</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- Placeholder content for other days -->
+                    <div class="tab-pane fade" id="tuesday" role="tabpanel">
+                        <p class="text-center p-3">Tuesday's Schedule will be displayed here.</p>
+                    </div>
+                    <div class="tab-pane fade" id="wednesday" role="tabpanel">
+                        <p class="text-center p-3">Wednesday's Schedule will be displayed here.</p>
+                    </div>
+                    <div class="tab-pane fade" id="thursday" role="tabpanel">
+                        <p class="text-center p-3">Thursday's Schedule will be displayed here.</p>
+                    </div>
+                    <div class="tab-pane fade" id="friday" role="tabpanel">
+                        <p class="text-center p-3">Friday's Schedule will be displayed here.</p>
+                    </div>
+                    <div class="tab-pane fade" id="saturday" role="tabpanel">
+                        <p class="text-center p-3">Saturday's Schedule will be displayed here.</p>
+                    </div>
+                    <div class="tab-pane fade" id="sunday" role="tabpanel">
+                        <p class="text-center p-3">Sunday's Schedule will be displayed here.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Shows Section -->
+        <section id="shows" class="py-5">
+            <div class="container">
+                <h2 class="section-title text-center">Featured Shows</h2>
+                <div class="row g-4">
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100">
+                            <img src="https://placehold.co/600x400/E63946/F1FAEE?text=Road+to+Zion" class="card-img-top"
+                                alt="Show Art">
+                            <div class="card-body">
+                                <h5 class="card-title fw-bold">Road to Zion</h5>
+                                <p class="card-text">Reggae, dub, and island rhythms to lift your spirits.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100">
+                            <img src="https://placehold.co/600x400/457B9D/F1FAEE?text=Local+Focus" class="card-img-top"
+                                alt="Show Art">
+                            <div class="card-body">
+                                <h5 class="card-title fw-bold">Local Focus</h5>
+                                <p class="card-text">Interviews and music from Salt Lake City's vibrant arts scene.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100">
+                            <img src="https://placehold.co/600x400/1D3557/F1FAEE?text=Global+Groove"
+                                class="card-img-top" alt="Show Art">
+                            <div class="card-body">
+                                <h5 class="card-title fw-bold">The Global Groove</h5>
+                                <p class="card-text">Exploring music from every corner of the planet.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="py-5 bg-light">
+            <div class="container">
+                <h2 class="section-title text-center">About KUAA</h2>
+                <div class="row align-items-center g-5">
+                    <div class="col-lg-6">
+                        <h3 class="fw-bold">Our Mission & History</h3>
+                        <p>KUAA 99.9 FM is a low-powered FM community radio station broadcasting terrestrially in Salt
+                            Lake City and
+                            streaming around the world. We pride ourselves on specializing in musical, cultural,
+                            linguistic, and
+                            artistic diversity.</p>
+                        <p>An extension of the Utah Arts Alliance, KUAA was granted a license by the FCC in 2015 and has
+                            been on air
+                            since, serving as a platform for underrepresented voices and artists.</p>
+                    </div>
+                    <div class="col-lg-6">
+                        <img src="https://placehold.co/600x400/A8DADC/1D3557?text=Utah+Arts+Alliance"
+                            class="img-fluid rounded-3 shadow" alt="Utah Arts Alliance">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Get Involved Section -->
+        <section id="involved" class="py-5">
+            <div class="container">
+                <h2 class="section-title text-center">Get Involved</h2>
+                <div class="row g-4 text-center">
+                    <div class="col-md-4">
+                        <div class="card h-100 p-4">
+                            <i class="bi bi-heart-fill display-3 text-danger"></i>
+                            <h3 class="mt-3 fw-bold">Donate</h3>
+                            <p>Your contributions keep community radio alive and thriving in SLC. Every dollar helps!
+                            </p>
+                            <a href="#" class="btn btn-danger mt-auto">Donate Now</a>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100 p-4">
+                            <i class="bi bi-people-fill display-3 text-info"></i>
+                            <h3 class="mt-3 fw-bold">Volunteer</h3>
+                            <p>From on-air hosting to event support, we have a place for your talents. Join the KUAA
+                                family!</p>
+                            <a href="#" class="btn btn-info text-white mt-auto">Learn More</a>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100 p-4">
+                            <i class="bi bi-briefcase-fill display-3" style="color: var(--kuaa-accent);"></i>
+                            <h3 class="mt-3 fw-bold">Underwriting</h3>
+                            <p>Support KUAA while promoting your business to our diverse and engaged listenership.</p>
+                            <a href="#" class="btn mt-auto"
+                                style="background-color: var(--kuaa-accent); color: white;">Become a
+                                Sponsor</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Community Section -->
+        <section id="community" class="py-5 bg-light">
+            <div class="container">
+                <h2 class="section-title text-center">Community News & Events</h2>
+                <div class="row g-4">
+                    <div class="col-lg-6">
+                        <h3 class="fw-bold mb-4">Latest News</h3>
+                        <div class="d-flex mb-3">
+                            <div class="flex-shrink-0"><i class="bi bi-newspaper fs-2 text-primary"></i></div>
+                            <div class="flex-grow-1 ms-3">
+                                <h5 class="fw-bold">KUAA Roller Skating Disco Party!</h5>
+                                <p>Join us for a night of fun and fundraising. <a href="#">Read more...</a></p>
+                            </div>
+                        </div>
+                        <div class="d-flex mb-3">
+                            <div class="flex-shrink-0"><i class="bi bi-newspaper fs-2 text-primary"></i></div>
+                            <div class="flex-grow-1 ms-3">
+                                <h5 class="fw-bold">Navigating SLC's Record Stores</h5>
+                                <p>Our guide to the best vinyl spots in the city. <a href="#">Read more...</a></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <h3 class="fw-bold mb-4">Upcoming Events</h3>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item bg-transparent d-flex justify-content-between align-items-start">
+                                <div class="ms-2 me-auto">
+                                    <div class="fw-bold">Merch Pick-Up Party</div>
+                                    @ The Urban Arts Gallery
+                                </div>
+                                <span class="badge bg-danger rounded-pill">May 31</span>
+                            </li>
+                            <li class="list-group-item bg-transparent d-flex justify-content-between align-items-start">
+                                <div class="ms-2 me-auto">
+                                    <div class="fw-bold">Live Broadcast from Craft Lake City</div>
+                                    @ Utah State Fairpark
+                                </div>
+                                <span class="badge bg-danger rounded-pill">Aug 9</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="py-5">
+            <div class="container">
+                <h2 class="section-title text-center">Contact Us</h2>
+                <div class="row g-5">
+                    <div class="col-lg-6">
+                        <h3 class="fw-bold">Get In Touch</h3>
+                        <p>Have a question, a song request, or want to get involved? We'd love to hear from you.</p>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><i class="bi bi-geo-alt-fill me-2"></i>123 Art St, Salt Lake City, UT 84101
+                            </li>
+                            <li class="mb-2"><i class="bi bi-telephone-fill me-2"></i>(801) 555-KUAA</li>
+                            <li class="mb-2"><i class="bi bi-envelope-fill me-2"></i>contact@kuaafm.org</li>
+                        </ul>
+                    </div>
+                    <div class="col-lg-6">
+                        <form>
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Name</label>
+                                <input type="text" class="form-control" id="name" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="message" class="form-label">Message</label>
+                                <textarea class="form-control" id="message" rows="4" required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Send Message</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer py-4">
+        <div class="container text-center">
+            <div class="mb-3">
+                <a href="#" class="fs-4 mx-2"><i class="bi bi-facebook"></i></a>
+                <a href="#" class="fs-4 mx-2"><i class="bi bi-instagram"></i></a>
+                <a href="#" class="fs-4 mx-2"><i class="bi bi-twitter-x"></i></a>
+            </div>
+            <p>&copy; 2025 KUAA 99.9 FM. A project of the <a href="https://utaharts.org/" target="_blank">Utah Arts
+                    Alliance</a>.</p>
+        </div>
+    </footer>
+
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Custom JavaScript for Spintron Integration -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- UPDATED CONFIGURATION ---
+            // This now points to our own serverless function, avoiding CORS errors.
+            const nowPlayingApiUrl = `/.netlify/functions/get-now-playing`;
+
+            // --- DOM Elements ---
+            const showElement = document.getElementById('now-playing-show');
+            const djElement = document.getElementById('now-playing-dj');
+            const songElement = document.getElementById('now-playing-song');
+
+            // --- Function to fetch and update "Now Playing" info ---
+            const fetchNowPlaying = async () => {
+                try {
+                    // Fetch data from our serverless function
+                    const response = await fetch(nowPlayingApiUrl);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const data = await response.json();
+
+                    if (data.items && data.items.length > 0) {
+                        const latestSpin = data.items[0];
+                        const showName = latestSpin.playlist.title || 'Community Programming';
+                        const djName = latestSpin.playlist.dj_name || 'KUAA';
+                        const songTitle = latestSpin.song || 'Music Variety';
+                        const artistName = latestSpin.artist || 'Various Artists';
+
+                        // Update the HTML content
+                        showElement.textContent = showName;
+                        djElement.innerHTML = `<i class="bi bi-mic-fill"></i> with ${djName}`;
+                        songElement.innerHTML = `<i class="bi bi-music-note-beamed"></i> "${songTitle}" by ${artistName}`;
+                    } else {
+                        // Handle case where no spins are returned
+                        showElement.textContent = 'Community Programming';
+                        djElement.innerHTML = `<i class="bi bi-mic-fill"></i> with KUAA`;
+                        songElement.innerHTML = `<i class="bi bi-music-note-beamed"></i> Music for the People`;
+                    }
+                } catch (error) {
+                    console.error("Error fetching Now Playing data:", error);
+                    // Display a friendly error message on the page
+                    showElement.textContent = 'On Air';
+                    djElement.innerHTML = `<i class="bi bi-mic-fill"></i> with KUAA`;
+                    songElement.innerHTML = `<i class="bi bi-info-circle-fill"></i> Could not load current song info.`;
+                }
+            };
+
+            // --- Initial fetch and interval ---
+            fetchNowPlaying(); // Fetch immediately on page load
+            setInterval(fetchNowPlaying, 20000); // Refresh every 20 seconds
+        });
+    </script>
+
+    <!-- Smooth Scroll JS -->
+    <script>
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                if (this.getAttribute('data-bs-toggle') === 'tab') {
+                    return;
+                }
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>
