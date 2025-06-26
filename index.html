@@ -85,25 +85,24 @@
             background-color: rgba(29, 53, 87, 0.8);
             border: 2px solid var(--kuaa-light);
             border-radius: 1rem;
-            padding: 2rem;
+            padding: 1.5rem;
             backdrop-filter: blur(5px);
         }
 
         .now-playing-card img {
-            width: 150px;
-            height: 150px;
+            width: 120px;
+            height: 120px;
             object-fit: cover;
             flex-shrink: 0;
-            /* Prevents image from shrinking */
         }
 
         #play-pause-btn {
             background-color: var(--kuaa-primary);
             color: var(--kuaa-secondary);
             border-radius: 50%;
-            width: 70px;
-            height: 70px;
-            font-size: 2.5rem;
+            width: 60px;
+            height: 60px;
+            font-size: 2rem;
             line-height: 1;
             border: none;
             transition: all 0.2s ease-in-out;
@@ -149,8 +148,11 @@
                         <li class="nav-item"><a class="nav-link" href="#schedule">Schedule</a></li>
                         <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
                         <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
-                        <li class="nav-item ms-lg-2 mt-2 mt-lg-0"><a class="btn btn-danger btn-lg" href="#home"><i
-                                    class="bi bi-broadcast-pin"></i> Listen Live</a></li>
+                        <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
+                            <button id="nav-play-btn" class="btn btn-danger btn-lg">
+                                <i id="nav-play-icon" class="bi bi-play-fill"></i> Listen Live
+                            </button>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -167,14 +169,15 @@
                             pride ourselves on specializing in musical, cultural, linguistic, and artistic diversity.
                             KUAA is an extension of and brought to you by Utah Arts Alliance.</p>
 
-                        <div id="listen-live" class="now-playing-card d-flex align-items-center p-3">
-                            <img id="now-playing-cover" src="https://placehold.co/150x150/1D3557/F1FAEE?text=KUAA"
+                        <div id="listen-live-player" class="now-playing-card d-flex align-items-center p-3">
+                            <img id="now-playing-cover" src="https://placehold.co/120x120/1D3557/F1FAEE?text=KUAA"
                                 class="rounded shadow" alt="Album Art">
                             <div class="ms-3 ms-md-4 text-start flex-grow-1">
-                                <h3 class="mb-1 small text-uppercase">ON AIR NOW</h3>
-                                <h4 id="now-playing-show" class="text-light mb-2">Loading Show...</h4>
-                                <p id="now-playing-song" class="mb-0 fs-5 fw-bold">Loading Song...</p>
-                                <p id="now-playing-artist" class="mb-0">Loading Artist...</p>
+                                <h3 class="mb-1 small text-uppercase fw-bold">NOW PLAYING</h3>
+                                <h4 id="now-playing-show" class="text-light mb-1 fs-5">Loading Show...</h4>
+                                <p id="now-playing-dj" class="mb-2 small"><em>Loading DJ...</em></p>
+                                <p id="now-playing-song" class="mb-0 fw-bold">Loading Song...</p>
+                                <p id="now-playing-artist" class="mb-0 small">Loading Artist...</p>
                             </div>
                             <div class="ms-3 ms-md-4">
                                 <button id="play-pause-btn" class="d-flex align-items-center justify-content-center">
@@ -254,7 +257,7 @@
             </div>
         </section>
 
-        <!-- The rest of the page sections (About, etc.) go here -->
+        <!-- Other sections like About, Contact would go here -->
     </main>
     <footer class="footer py-4">
         <div class="container text-center">
@@ -270,25 +273,44 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // --- PLAYER CONTROLS ---
             const audioPlayer = document.getElementById('audio-player');
             const playPauseBtn = document.getElementById('play-pause-btn');
             const playPauseIcon = document.getElementById('play-pause-icon');
+            const navPlayBtn = document.getElementById('nav-play-btn');
+            const navPlayIcon = document.getElementById('nav-play-icon');
 
-            playPauseBtn.addEventListener('click', () => {
-                if (audioPlayer.paused) {
+            function togglePlay() {
+                const isPaused = audioPlayer.paused;
+                if (isPaused) {
                     audioPlayer.play();
-                    playPauseIcon.classList.remove('bi-play-fill');
-                    playPauseIcon.classList.add('bi-pause-fill');
                 } else {
                     audioPlayer.pause();
+                }
+                updatePlayIcons(!isPaused);
+            }
+
+            function updatePlayIcons(isPlaying) {
+                if (isPlaying) {
+                    playPauseIcon.classList.remove('bi-play-fill');
+                    playPauseIcon.classList.add('bi-pause-fill');
+                    navPlayIcon.classList.remove('bi-play-fill');
+                    navPlayIcon.classList.add('bi-pause-fill');
+                } else {
                     playPauseIcon.classList.remove('bi-pause-fill');
                     playPauseIcon.classList.add('bi-play-fill');
+                    navPlayIcon.classList.remove('bi-pause-fill');
+                    navPlayIcon.classList.add('bi-play-fill');
                 }
-            });
+            }
+
+            playPauseBtn.addEventListener('click', togglePlay);
+            navPlayBtn.addEventListener('click', togglePlay);
 
             // --- NOW PLAYING ---
             const nowPlayingApiUrl = `/.netlify/functions/get-now-playing`;
             const showElement = document.getElementById('now-playing-show');
+            const djElement = document.getElementById('now-playing-dj');
             const songElement = document.getElementById('now-playing-song');
             const artistElement = document.getElementById('now-playing-artist');
             const coverElement = document.getElementById('now-playing-cover');
@@ -303,26 +325,29 @@
                         const latestSpin = data.items[0];
 
                         showElement.textContent = latestSpin.playlist ? latestSpin.playlist.title : 'Community Programming';
+                        djElement.innerHTML = `with <em>${latestSpin.playlist ? latestSpin.playlist.dj_name : 'KUAA'}</em>`;
                         songElement.textContent = latestSpin.song || 'Music Variety';
                         artistElement.textContent = latestSpin.artist || 'Various Artists';
 
-                        const imageUrl = latestSpin.image || 'https://placehold.co/150x150/1D3557/F1FAEE?text=KUAA';
+                        const imageUrl = latestSpin.image || 'https://placehold.co/120x120/1D3557/F1FAEE?text=KUAA';
                         if (coverElement.src !== imageUrl) {
                             coverElement.src = imageUrl;
                         }
 
                     } else {
                         showElement.textContent = 'Community Programming';
+                        djElement.innerHTML = 'with <em>KUAA</em>';
                         songElement.textContent = 'Music for the People';
-                        artistElement.textContent = 'KUAA';
-                        coverElement.src = 'https://placehold.co/150x150/1D3557/F1FAEE?text=KUAA';
+                        artistElement.textContent = 'Various Artists';
+                        coverElement.src = 'https://placehold.co/120x120/1D3557/F1FAEE?text=KUAA';
                     }
                 } catch (error) {
                     console.error("Error fetching Now Playing data:", error);
                     showElement.textContent = 'On Air';
+                    djElement.innerHTML = '';
                     songElement.textContent = 'Could not load current song info.';
                     artistElement.textContent = 'Please check back shortly.';
-                    coverElement.src = 'https://placehold.co/150x150/1D3557/F1FAEE?text=Error';
+                    coverElement.src = 'https://placehold.co/120x120/1D3557/F1FAEE?text=Error';
                 }
             };
             fetchNowPlaying();
@@ -336,7 +361,7 @@
                 const minutes = date.getMinutes();
                 const ampm = hours >= 12 ? 'PM' : 'AM';
                 hours %= 12;
-                hours = hours || 12; // the hour '0' should be '12'
+                hours = hours || 12;
                 return `${hours}:${minutes < 10 ? '0' + minutes : minutes} ${ampm}`;
             };
             const fetchSchedule = async () => {
@@ -407,7 +432,7 @@
             // --- SMOOTH SCROLL ---
             document.querySelectorAll('a[href^="#"]').forEach(anchor => {
                 anchor.addEventListener('click', function (e) {
-                    if (this.getAttribute('data-bs-toggle') === 'tab') return;
+                    if (this.getAttribute('data-bs-toggle') === 'tab' || this.id === 'nav-play-btn') return;
                     e.preventDefault();
                     document.querySelector(this.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
                 });

@@ -10,8 +10,8 @@ exports.handler = async function (event, context) {
         };
     }
 
-    // This endpoint fetches all upcoming shows. We'll get a good amount to build a weekly schedule.
-    const spinitronApiUrl = `https://spinitron.com/api/shows?access-token=${spinitronApiKey}&station=kuaa&count=150`;
+    // Added `&with=personas` to ensure DJ/host data is included in the response.
+    const spinitronApiUrl = `https://spinitron.com/api/shows?access-token=${spinitronApiKey}&station=kuaa&count=150&with=personas`;
 
     try {
         const response = await fetch(spinitronApiUrl);
