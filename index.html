@@ -242,20 +242,17 @@
                             playerArtFg.src = imageUrl;
                             playerArtBg.style.backgroundImage = `url(${imageUrl})`;
 
-                            // Dynamic color update
                             playerArtFg.addEventListener('load', () => {
                                 try {
                                     const dominantColor = colorThief.getColor(playerArtFg);
                                     const rgbColor = `rgb(${dominantColor.join(',')})`;
                                     playerContainer.style.setProperty('--player-bg', rgbColor);
                                 } catch (e) {
-                                    console.error("ColorThief error:", e);
                                     playerContainer.style.setProperty('--player-bg', '#2d3436');
                                 }
                             }, { once: true });
                         }
                     } else {
-                        // Reset to default state
                         playerContainer.style.setProperty('--player-bg', '#2d3436');
                     }
                 } catch (error) {
@@ -300,11 +297,12 @@
             const scheduleApiUrl = `/.netlify/functions/get-schedule`;
             const formatTime = (dateStr) => {
                 const date = new Date(dateStr);
-                let hours = date.getHours();
-                const minutes = date.getMinutes();
+                // Use UTC hours and minutes to prevent time zone shifts
+                let hours = date.getUTCHours();
+                const minutes = date.getUTCMinutes();
                 const ampm = hours >= 12 ? 'PM' : 'AM';
                 hours %= 12;
-                hours = hours || 12;
+                hours = hours || 12; // the hour '0' should be '12'
                 return `${hours}:${minutes < 10 ? '0' + minutes : minutes} ${ampm}`;
             };
             const fetchSchedule = async () => {
