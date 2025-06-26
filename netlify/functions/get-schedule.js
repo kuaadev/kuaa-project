@@ -1,25 +1,25 @@
 const fetch = require('node-fetch');
 
 exports.handler = async function (event, context) {
-    const spintronApiKey = process.env.SPINTRON_API_KEY;
+    const spinitronApiKey = process.env.SPINITRON_API_KEY;
 
-    if (!spintronApiKey) {
+    if (!spinitronApiKey) {
         return {
             statusCode: 500,
-            body: JSON.stringify({ error: "Spintron API key is not configured." })
+            body: JSON.stringify({ error: "Spinitron API key is not configured." })
         };
     }
 
     // This endpoint fetches all upcoming shows. We'll get a good amount to build a weekly schedule.
-    const spintronApiUrl = `https://spintron.com/api/shows?access-token=${spintronApiKey}&station=kuaa&count=150`;
+    const spinitronApiUrl = `https://spinitron.com/api/shows?access-token=${spinitronApiKey}&station=kuaa&count=150`;
 
     try {
-        const response = await fetch(spintronApiUrl);
+        const response = await fetch(spinitronApiUrl);
 
         if (!response.ok) {
             return {
                 statusCode: response.status,
-                body: JSON.stringify({ error: `Spintron API error: ${response.statusText}` })
+                body: JSON.stringify({ error: `Spinitron API error: ${response.statusText}` })
             };
         }
 
