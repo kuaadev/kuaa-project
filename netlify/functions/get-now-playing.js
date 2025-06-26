@@ -1,24 +1,24 @@
 const fetch = require('node-fetch');
 
 exports.handler = async function (event, context) {
-    const spintronApiKey = process.env.SPINTRON_API_KEY;
+    const spinitronApiKey = process.env.SPINITRON_API_KEY;
 
-    if (!spintronApiKey) {
+    if (!spinitronApiKey) {
         return {
             statusCode: 500,
-            body: JSON.stringify({ error: "Spintron API key is not configured." })
+            body: JSON.stringify({ error: "Spinitron API key is not configured." })
         };
     }
 
-    const spintronApiUrl = `https://spinitron.com/api/spins?access-token=${spintronApiKey}&station=kuaa&count=1`;
+    const spinitronApiUrl = `https://spinitron.com/api/spins?access-token=${spinitronApiKey}&station=kuaa&count=1`;
 
     try {
-        const response = await fetch(spintronApiUrl);
+        const response = await fetch(spinitronApiUrl);
 
         if (!response.ok) {
             return {
                 statusCode: response.status,
-                body: JSON.stringify({ error: `Spintron API error: ${response.statusText}` })
+                body: JSON.stringify({ error: `Spinitron API error: ${response.statusText}` })
             };
         }
 
