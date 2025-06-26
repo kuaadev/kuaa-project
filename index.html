@@ -10,183 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --kuaa-primary: #E63946;
-            --kuaa-secondary: #F1FAEE;
-            --kuaa-dark: #1D3557;
-            --kuaa-light: #A8DADC;
-            --kuaa-accent: #457B9D;
-            --player-bg: #2d3436;
-            --player-text: #dfe6e9;
-            --player-text-muted: #b2bec3;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--kuaa-secondary);
-            color: var(--kuaa-dark);
-        }
-
-        .navbar {
-            background-color: rgba(29, 53, 87, 0.95);
-            backdrop-filter: blur(10px);
-        }
-
-        .navbar-brand {
-            font-weight: 900;
-            font-size: 1.8rem;
-        }
-
-        .nav-link {
-            font-weight: 700;
-        }
-
-        .btn-danger {
-            background-color: var(--kuaa-primary);
-            border-color: var(--kuaa-primary);
-        }
-
-        .btn-danger:hover {
-            background-color: #c42d39;
-            border-color: #c42d39;
-        }
-
-        .section-title {
-            font-weight: 900;
-            color: var(--kuaa-dark);
-            position: relative;
-            display: inline-block;
-            padding-bottom: 0.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .section-title::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 50%;
-            height: 4px;
-            background-color: var(--kuaa-primary);
-            border-radius: 2px;
-        }
-
-        .hero {
-            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url('https://placehold.co/1920x1080/1D3557/F1FAEE?text=KUAA+Broadcast') no-repeat center center;
-            background-size: cover;
-            color: var(--kuaa-secondary);
-            padding: 8rem 0;
-        }
-
-        .hero h1 {
-            font-weight: 900;
-            font-size: 3.5rem;
-        }
-
-        .player-container {
-            background-color: var(--player-bg);
-            color: var(--player-text);
-            border-radius: 1.5rem;
-            overflow: hidden;
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
-        }
-
-        .player-art-bg {
-            position: relative;
-            padding-top: 40%;
-            background-size: cover;
-            background-position: center center;
-        }
-
-        .player-art-bg::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(to top, var(--player-bg) 0%, rgba(45, 52, 54, 0.7) 50%, var(--player-bg) 100%);
-        }
-
-        .player-art-fg {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 50%;
-            max-width: 200px;
-            aspect-ratio: 1 / 1;
-            border-radius: 0.75rem;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-            object-fit: cover;
-            z-index: 2;
-        }
-
-        .player-info {
-            padding: 1.5rem;
-            padding-top: 1rem;
-        }
-
-        .player-info .song-title {
-            font-weight: 700;
-            font-size: 1.2rem;
-        }
-
-        .player-info .artist-name {
-            font-weight: 400;
-            font-size: 1rem;
-        }
-
-        .player-info .album-name {
-            font-weight: 400;
-            font-size: 0.9rem;
-            color: var(--player-text-muted);
-        }
-
-        .player-controls button {
-            background: transparent;
-            border: none;
-            color: var(--player-text);
-            font-size: 1.5rem;
-            opacity: 0.8;
-            transition: all 0.2s ease-in-out;
-        }
-
-        .player-controls button:hover {
-            opacity: 1;
-            transform: scale(1.1);
-        }
-
-        .player-controls .play-btn {
-            background-color: var(--kuaa-primary);
-            border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            font-size: 2rem;
-        }
-
-        .recent-spin-item img {
-            width: 50px;
-            height: 50px;
-            object-fit: cover;
-        }
-
-        .schedule .nav-link {
-            color: var(--kuaa-accent);
-            font-weight: 700;
-        }
-
-        .schedule .nav-link.active {
-            background-color: var(--kuaa-accent) !important;
-            color: var(--kuaa-secondary) !important;
-        }
-
-        .schedule .table {
-            border-radius: 0.5rem;
-            overflow: hidden;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
@@ -228,17 +52,18 @@
                             pride ourselves on specializing in musical, cultural, linguistic, and artistic diversity.
                             KUAA is an extension of and brought to you by Utah Arts Alliance.</p>
 
-                        <div class="player-container text-center">
+                        <div id="player-container" class="player-container text-center">
                             <div id="player-art-bg" class="player-art-bg">
                                 <img id="player-art-fg" src="https://placehold.co/200/2d3436/dfe6e9?text=KUAA"
-                                    alt="Album Art" class="player-art-fg">
+                                    alt="Album Art" class="player-art-fg" crossorigin="anonymous">
                             </div>
                             <div class="player-info">
                                 <p id="player-song" class="song-title mb-0">Loading Song...</p>
                                 <p id="player-artist" class="artist-name mb-1">Loading Artist...</p>
                                 <p id="player-album" class="album-name mb-3">Loading Album...</p>
                                 <div class="player-controls d-flex justify-content-center align-items-center">
-                                    <button class="mx-3"><i class="bi bi-volume-up"></i></button>
+                                    <button id="volume-btn" class="mx-3"><i id="volume-icon"
+                                            class="bi bi-volume-up-fill"></i></button>
                                     <button id="play-pause-btn" class="play-btn mx-3"><i id="play-pause-icon"
                                             class="bi bi-play-fill"></i></button>
                                     <button class="mx-3"><i class="bi bi-heart"></i></button>
@@ -348,44 +173,51 @@
         </div>
     </footer>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            const colorThief = new ColorThief();
+
             // --- PLAYER CONTROLS ---
             const audioPlayer = document.getElementById('audio-player');
             const playPauseBtn = document.getElementById('play-pause-btn');
             const playPauseIcon = document.getElementById('play-pause-icon');
             const navPlayBtn = document.getElementById('nav-play-btn');
             const navPlayIcon = document.getElementById('nav-play-icon');
+            const volumeBtn = document.getElementById('volume-btn');
+            const volumeIcon = document.getElementById('volume-icon');
 
             function togglePlay() {
-                const isPaused = audioPlayer.paused;
-                if (isPaused) {
-                    audioPlayer.play();
+                if (audioPlayer.paused) {
+                    audioPlayer.play().catch(e => console.error("Play initiation failed:", e));
                 } else {
                     audioPlayer.pause();
                 }
-                updatePlayIcons(!isPaused);
             }
 
-            function updatePlayIcons(isPlaying) {
-                if (isPlaying) {
-                    playPauseIcon.classList.remove('bi-play-fill');
-                    playPauseIcon.classList.add('bi-pause-fill');
-                    navPlayIcon.classList.remove('bi-play-fill');
-                    navPlayIcon.classList.add('bi-pause-fill');
-                } else {
-                    playPauseIcon.classList.remove('bi-pause-fill');
-                    playPauseIcon.classList.add('bi-play-fill');
-                    navPlayIcon.classList.remove('bi-pause-fill');
-                    navPlayIcon.classList.add('bi-play-fill');
-                }
+            function updatePlayIcons() {
+                const isPlaying = !audioPlayer.paused;
+                playPauseIcon.className = isPlaying ? 'bi bi-pause-fill' : 'bi bi-play-fill';
+                navPlayIcon.className = isPlaying ? 'bi bi-pause-fill' : 'bi bi-play-fill';
+            }
+
+            function toggleMute() {
+                audioPlayer.muted = !audioPlayer.muted;
+                volumeIcon.className = audioPlayer.muted ? 'bi bi-volume-mute-fill' : 'bi bi-volume-up-fill';
             }
 
             playPauseBtn.addEventListener('click', togglePlay);
             navPlayBtn.addEventListener('click', togglePlay);
+            volumeBtn.addEventListener('click', toggleMute);
+            audioPlayer.addEventListener('play', updatePlayIcons);
+            audioPlayer.addEventListener('pause', updatePlayIcons);
+            audioPlayer.addEventListener('volumechange', () => {
+                volumeIcon.className = audioPlayer.muted || audioPlayer.volume === 0 ? 'bi bi-volume-mute-fill' : 'bi bi-volume-up-fill';
+            });
 
             // --- NOW PLAYING ---
             const nowPlayingApiUrl = `/.netlify/functions/get-now-playing`;
+            const playerContainer = document.getElementById('player-container');
             const playerSong = document.getElementById('player-song');
             const playerArtist = document.getElementById('player-artist');
             const playerAlbum = document.getElementById('player-album');
@@ -409,22 +241,26 @@
                         if (playerArtFg.src !== imageUrl) {
                             playerArtFg.src = imageUrl;
                             playerArtBg.style.backgroundImage = `url(${imageUrl})`;
-                        }
 
+                            // Dynamic color update
+                            playerArtFg.addEventListener('load', () => {
+                                try {
+                                    const dominantColor = colorThief.getColor(playerArtFg);
+                                    const rgbColor = `rgb(${dominantColor.join(',')})`;
+                                    playerContainer.style.setProperty('--player-bg', rgbColor);
+                                } catch (e) {
+                                    console.error("ColorThief error:", e);
+                                    playerContainer.style.setProperty('--player-bg', '#2d3436');
+                                }
+                            }, { once: true });
+                        }
                     } else {
-                        playerSong.textContent = 'Community Programming';
-                        playerArtist.textContent = 'KUAA';
-                        playerAlbum.textContent = 'Salt Lake City';
-                        playerArtFg.src = 'https://placehold.co/200/2d3436/dfe6e9?text=KUAA';
-                        playerArtBg.style.backgroundImage = 'none';
+                        // Reset to default state
+                        playerContainer.style.setProperty('--player-bg', '#2d3436');
                     }
                 } catch (error) {
                     console.error("Error fetching Now Playing data:", error);
-                    playerSong.textContent = 'On Air';
-                    playerArtist.textContent = 'Could not load current song info.';
-                    playerAlbum.textContent = 'Please check back shortly.';
-                    playerArtFg.src = 'https://placehold.co/200/2d3436/dfe6e9?text=Error';
-                    playerArtBg.style.backgroundImage = 'none';
+                    playerContainer.style.setProperty('--player-bg', '#2d3436');
                 }
             };
 
@@ -457,7 +293,6 @@
                     }
                 } catch (error) {
                     console.error("Error fetching recent spins:", error);
-                    recentSpinsContainer.innerHTML = '<p class="text-center p-3 text-danger">Could not load recent songs.</p>';
                 }
             };
 
@@ -554,3 +389,5 @@
         });
     </script>
 </body>
+
+</html>
