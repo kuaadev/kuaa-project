@@ -10,7 +10,7 @@ exports.handler = async function (event, context) {
         };
     }
 
-    // Added `&with=personas` to ensure DJ/host data is included in the response.
+    // This now correctly includes the `with=personas` parameter to fetch DJ names.
     const spinitronApiUrl = `https://spinitron.com/api/shows?access-token=${spinitronApiKey}&station=kuaa&count=150&with=personas`;
 
     try {

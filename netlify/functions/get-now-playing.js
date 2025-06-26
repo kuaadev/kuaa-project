@@ -10,7 +10,8 @@ exports.handler = async function (event, context) {
         };
     }
 
-    const spinitronApiUrl = `https://spinitron.com/api/spins?access-token=${spinitronApiKey}&station=kuaa&count=1`;
+    // This now correctly includes `with=show` and `with=personas`
+    const spinitronApiUrl = `https://spinitron.com/api/spins?access-token=${spinitronApiKey}&station=kuaa&count=1&with=show,personas`;
 
     try {
         const response = await fetch(spinitronApiUrl);

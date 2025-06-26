@@ -324,8 +324,15 @@
                     if (data.items && data.items.length > 0) {
                         const latestSpin = data.items[0];
 
-                        showElement.textContent = latestSpin.playlist ? latestSpin.playlist.title : 'Community Programming';
-                        djElement.innerHTML = `with <em>${latestSpin.playlist ? latestSpin.playlist.dj_name : 'KUAA'}</em>`;
+                        // The 'show' object is now included in the spin data
+                        const showName = latestSpin.show ? latestSpin.show.title : 'Community Programming';
+
+                        const djName = (latestSpin.show && latestSpin.show.personas && latestSpin.show.personas.length > 0)
+                            ? latestSpin.show.personas.map(p => p.name).join(' & ')
+                            : 'KUAA';
+
+                        showElement.textContent = showName;
+                        djElement.innerHTML = `with <em>${djName}</em>`;
                         songElement.textContent = latestSpin.song || 'Music Variety';
                         artistElement.textContent = latestSpin.artist || 'Various Artists';
 
