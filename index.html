@@ -222,10 +222,8 @@
             const playerShow = document.getElementById('player-show');
             const playerSong = document.getElementById('player-song');
             const playerArtist = document.getElementById('player-artist');
-            const playerAlbum = document.getElementById('player-album');
             const playerArtBg = document.getElementById('player-art-bg');
             const playerArtFg = document.getElementById('player-art-fg');
-            const playerDjLink = document.getElementById('player-dj-link');
 
             const fetchNowPlaying = async () => {
                 try {
@@ -244,7 +242,6 @@
                         playerShow.textContent = `${showName} with ${djName}`;
                         playerSong.textContent = latestSpin.song || 'Music Variety';
                         playerArtist.textContent = latestSpin.artist || 'Various Artists';
-                        playerAlbum.style.display = 'none'; // Hide the album since it's not in the design
 
                         const imageUrl = latestSpin.image || 'https://placehold.co/200/2d3436/dfe6e9?text=KUAA';
                         if (playerArtFg.src !== imageUrl) {
@@ -326,7 +323,8 @@
                     const showsByDay = { 0: [], 1: [], 2: [], 3: [], 4: [], 5: [], 6: [] };
                     shows.forEach(show => {
                         const showDate = new Date(show.start);
-                        const dayOfWeek = showDate.getUTCDay();
+                        // CORRECTED: Use getDay() to get the day based on the browser's local timezone.
+                        const dayOfWeek = showDate.getDay();
                         showsByDay[dayOfWeek].push(show);
                     });
 
