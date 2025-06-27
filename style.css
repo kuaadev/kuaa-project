@@ -105,8 +105,8 @@ body {
     left: 50%;
     transform: translate(-50%, -50%);
     width: 60%;
-    max-width: 250px;
-    /* Increased from 200px */
+    max-width: 280px;
+    /* Increased */
     aspect-ratio: 1 / 1;
     border-radius: 0.75rem;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
@@ -117,6 +117,7 @@ body {
 .player-info {
     padding: 1.5rem;
     padding-top: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .player-info .song-title {
@@ -157,10 +158,25 @@ body {
     font-size: 2rem;
 }
 
+#recent-spins-container {
+    max-height: 240px;
+    overflow-y: auto;
+    background-color: transparent;
+}
+
+.recent-spin-item {
+    background-color: transparent !important;
+    border: none !important;
+    color: var(--player-text);
+}
+
 .recent-spin-item img {
-    width: 50px;
-    height: 50px;
+    width: 60px;
+    /* Increased */
+    height: 60px;
+    /* Increased */
     object-fit: cover;
+    border-radius: 0.5rem;
 }
 
 .schedule .nav-link {
