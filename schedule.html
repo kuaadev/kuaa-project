@@ -7,63 +7,8 @@
     <title>Schedule - KUAA 99.9 FM</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <style>
-        .schedule-grid {
-            display: grid;
-            grid-template-columns: 60px repeat(7, 1fr);
-            gap: 2px;
-            background-color: #dee2e6;
-        }
-
-        .schedule-header,
-        .schedule-time,
-        .schedule-slot {
-            background-color: white;
-            padding: 0.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-        }
-
-        .schedule-header {
-            font-weight: bold;
-            position: sticky;
-            top: 70px;
-            /* Adjust based on navbar height */
-            z-index: 10;
-        }
-
-        .schedule-time {
-            font-weight: bold;
-            font-size: 0.8rem;
-        }
-
-        .schedule-slot {
-            grid-row-start: var(--start-row);
-            grid-row-end: var(--end-row);
-            grid-column-start: var(--day-col);
-            background-color: var(--kuaa-light);
-            flex-direction: column;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            overflow: hidden;
-            padding: 0.5rem;
-        }
-
-        .show-title {
-            font-weight: bold;
-            color: var(--kuaa-dark);
-        }
-
-        .dj-name {
-            font-style: italic;
-        }
-    </style>
 </head>
 
 <body>
@@ -71,10 +16,20 @@
 
     <main class="container" style="padding-top: 8rem;">
         <section id="schedule-page" class="py-5">
-            <h1 class="section-title text-center">Weekly Schedule</h1>
-            <div id="schedule-container" class="bg-light p-3 rounded shadow">
-                <div id="schedule-grid" class="schedule-grid">
-                    <!-- Grid will be populated by JavaScript -->
+            <h1 class="section-title text-center">Today's Schedule</h1>
+            <div id="schedule-container" class="p-3 rounded shadow-sm bg-white">
+                <div id="timeline-container" class="timeline-container" style="height: 1440px;">
+                    <div id="time-ruler" class="time-ruler"></div>
+                    <div id="timeline" class="timeline">
+                        <div id="on-air-indicator" class="on-air-indicator">
+                            <span class="time"></span>
+                        </div>
+                        <div class="col-12 text-center p-5">
+                            <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -83,8 +38,16 @@
     <footer id="footer-placeholder" class="footer py-4"></footer>
 
     <script>
-        // --- TEMPLATE LOADER ---
-        async function loadTemplate(url, elementId) { /* ... */ }
+        async function loadTemplate(url, elementId) {
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`Failed to load template: ${url}`);
+                const text = await response.text();
+                document.getElementById(elementId).innerHTML = text;
+            } catch (error) {
+                console.error(error);
+            }
+        }
 
         async function initializePage() {
             await Promise.all([
@@ -92,11 +55,9 @@
                 loadTemplate('_footer.html', 'footer-placeholder')
             ]);
 
-            const currentPage = 'schedule.html';
             const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
             navLinks.forEach(link => {
-                const linkPage = link.getAttribute('href').split('#')[0];
-                if (linkPage === currentPage) {
+                if (link.getAttribute('href') === 'schedule.html') {
                     link.classList.add('active');
                 } else {
                     link.classList.remove('active');
@@ -109,8 +70,30 @@
         }
 
         function initializeSchedulePage() {
-            const scheduleGrid = document.getElementById('schedule-grid');
+            const timeRuler = document.getElementById('time-ruler');
+            const timeline = document.getElementById('timeline');
+            const onAirIndicator = document.getElementById('on-air-indicator');
             const scheduleApiUrl = `/.netlify/functions/get-schedule`;
+            const pixelsPerHour = 60; // 60px = 1 hour
+
+            function buildTimeRuler() {
+                for (let i = 0; i < 24; i++) {
+                    const hour = i % 12 === 0 ? 12 : i % 12;
+                    const ampm = i < 12 ? 'AM' : 'PM';
+                    const timeMarker = document.createElement('div');
+                    timeMarker.className = 'time-marker';
+                    timeMarker.textContent = `${hour} ${ampm}`;
+                    timeRuler.appendChild(timeMarker);
+                }
+            }
+
+            function updateOnAirIndicator() {
+                const now = new Date();
+                const minutes = now.getHours() * 60 + now.getMinutes();
+                const topPosition = (minutes / 60) * pixelsPerHour;
+                onAirIndicator.style.top = `${topPosition}px`;
+                onAirIndicator.querySelector('.time').textContent = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+            }
 
             const fetchAndRenderSchedule = async () => {
                 try {
@@ -118,62 +101,58 @@
                     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                     const scheduleData = await response.json();
 
-                    renderGrid(scheduleData);
+                    timeline.innerHTML = ''; // Clear spinner
+                    timeline.appendChild(onAirIndicator); // Re-add indicator
+
+                    const shows = scheduleData.data || [];
+                    const included = scheduleData.included || [];
+                    const today = new Date().getDay();
+
+                    const todayShows = shows.filter(show => new Date(show.attributes.start).getDay() === today);
+
+                    todayShows.forEach(show => {
+                        const start = new Date(show.attributes.start);
+                        const end = new Date(show.attributes.end);
+
+                        const startMinutes = start.getHours() * 60 + start.getMinutes();
+                        let endMinutes = end.getHours() * 60 + end.getMinutes();
+                        if (endMinutes === 0) endMinutes = 24 * 60; // Handle shows ending at midnight
+
+                        const top = (startMinutes / 60) * pixelsPerHour;
+                        let height = ((endMinutes - startMinutes) / 60) * pixelsPerHour;
+
+                        if (height <= 0) return; // Don't render invalid shows
+
+                        let djName = 'KUAA';
+                        if (show.relationships.personas && show.relationships.personas.data.length > 0) {
+                            djName = show.relationships.personas.data.map(pRef => {
+                                const persona = included.find(inc => inc.type === 'personas' && inc.id === pRef.id);
+                                return persona ? persona.attributes.name : '';
+                            }).filter(Boolean).join(' & ');
+                        }
+
+                        const showBlock = document.createElement('div');
+                        showBlock.className = 'show-block';
+                        showBlock.style.top = `${top}px`;
+                        showBlock.style.height = `${height}px`;
+                        showBlock.innerHTML = `
+                            <div class="show-block-title">${show.attributes.title}</div>
+                            <div class="show-block-dj">${djName}</div>
+                            <div class="show-block-time small text-white-50">${start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                        `;
+                        timeline.appendChild(showBlock);
+                    });
 
                 } catch (error) {
                     console.error("Error fetching schedule:", error);
-                    scheduleGrid.innerHTML = `<p class="text-center text-danger p-5">Could not load schedule.</p>`;
+                    timeline.innerHTML = `<p class="text-center text-danger p-5">Could not load schedule.</p>`;
                 }
             };
 
-            const renderGrid = (scheduleData) => {
-                const shows = scheduleData.data || [];
-                const included = scheduleData.included || [];
-                const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-                let gridHtml = '<div class="schedule-header"></div>'; // Empty corner
-                days.forEach(day => gridHtml += `<div class="schedule-header">${day}</div>`);
-
-                // Create time slots from 12 AM to 11 PM
-                for (let i = 0; i < 24; i++) {
-                    const hour = i % 12 === 0 ? 12 : i % 12;
-                    const ampm = i < 12 ? 'AM' : 'PM';
-                    gridHtml += `<div class="schedule-time">${hour} ${ampm}</div>`;
-                }
-
-                shows.forEach(show => {
-                    const start = new Date(show.attributes.start);
-                    const end = new Date(show.attributes.end);
-                    const visitorTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-                    const startLocal = new Date(start.toLocaleString('en-US', { timeZone: visitorTimeZone }));
-                    const endLocal = new Date(end.toLocaleString('en-US', { timeZone: visitorTimeZone }));
-
-                    const startRow = startLocal.getHours() + 2; // +2 to account for header row
-                    const endRow = endLocal.getHours() + 2;
-                    const dayCol = startLocal.getDay() + 2; // +2 to account for time column
-
-                    let djName = 'KUAA';
-                    if (show.relationships.personas && show.relationships.personas.data.length > 0) {
-                        const personaIds = show.relationships.personas.data.map(p => p.id);
-                        djName = personaIds.map(id => {
-                            const persona = included.find(inc => inc.type === 'personas' && inc.id === id);
-                            return persona ? persona.attributes.name : '';
-                        }).filter(Boolean).join(' & ');
-                    }
-
-                    gridHtml += `
-                        <div class="schedule-slot" style="--start-row: ${startRow}; --end-row: ${endRow}; --day-col: ${dayCol};">
-                            <div class="show-title">${show.attributes.title}</div>
-                            <div class="dj-name">${djName}</div>
-                        </div>
-                    `;
-                });
-
-                scheduleGrid.innerHTML = gridHtml;
-            };
-
+            buildTimeRuler();
+            updateOnAirIndicator();
             fetchAndRenderSchedule();
+            setInterval(updateOnAirIndicator, 60000);
         }
 
         initializePage();

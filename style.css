@@ -105,8 +105,7 @@ body {
     left: 50%;
     transform: translate(-50%, -50%);
     width: 60%;
-    max-width: 280px;
-    /* Increased */
+    max-width: 250px;
     aspect-ratio: 1 / 1;
     border-radius: 0.75rem;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
@@ -117,7 +116,6 @@ body {
 .player-info {
     padding: 1.5rem;
     padding-top: 1rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .player-info .song-title {
@@ -158,27 +156,6 @@ body {
     font-size: 2rem;
 }
 
-#recent-spins-container {
-    max-height: 240px;
-    overflow-y: auto;
-    background-color: transparent;
-}
-
-.recent-spin-item {
-    background-color: transparent !important;
-    border: none !important;
-    color: var(--player-text);
-}
-
-.recent-spin-item img {
-    width: 60px;
-    /* Increased */
-    height: 60px;
-    /* Increased */
-    object-fit: cover;
-    border-radius: 0.5rem;
-}
-
 .schedule .nav-link {
     color: var(--kuaa-accent);
     font-weight: 700;
@@ -192,4 +169,85 @@ body {
 .schedule .table {
     border-radius: 0.5rem;
     overflow: hidden;
+}
+
+.timeline-container {
+    position: relative;
+    display: flex;
+}
+
+.time-ruler {
+    flex-shrink: 0;
+    width: 80px;
+}
+
+.time-marker {
+    height: 60px;
+    /* 1 hour */
+    border-top: 1px solid #dee2e6;
+    text-align: right;
+    padding-right: 10px;
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+.timeline {
+    position: relative;
+    flex-grow: 1;
+    border-left: 2px solid #adb5bd;
+}
+
+.show-block {
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    background-color: var(--kuaa-accent);
+    color: white;
+    border-radius: 8px;
+    padding: 1rem;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.show-block-title {
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.show-block-dj {
+    font-style: italic;
+    opacity: 0.9;
+}
+
+.on-air-indicator {
+    position: absolute;
+    left: -10px;
+    right: 0;
+    height: 3px;
+    background-color: var(--kuaa-primary);
+    z-index: 10;
+    display: flex;
+    align-items: center;
+}
+
+.on-air-indicator::before {
+    content: '';
+    width: 12px;
+    height: 12px;
+    background-color: var(--kuaa-primary);
+    border-radius: 50%;
+    margin-left: -6px;
+}
+
+.on-air-indicator .time {
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: var(--kuaa-primary);
+    background-color: var(--kuaa-secondary);
+    padding: 2px 8px;
+    border-radius: 5px;
+    margin-left: 10px;
 }
