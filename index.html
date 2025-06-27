@@ -211,7 +211,37 @@
             const playerArtBg = document.getElementById('player-art-bg');
             const playerArtFg = document.getElementById('player-art-fg');
 
-            const fetchNowPlaying = async () => { /* This function is complete but omitted for brevity */ };
+            const fetchNowPlaying = async () => {
+                try {
+                    const response = await fetch(nowPlayingApiUrl);
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    const data = await response.json();
+
+                    playerShow.textContent = `${data.showTitle} with ${data.djName}`;
+                    playerSong.textContent = data.song;
+                    playerArtist.textContent = data.artist;
+
+                    const imageUrl = data.image || 'https://placehold.co/280/2d3436/dfe6e9?text=KUAA';
+                    if (playerArtFg.src !== imageUrl) {
+                        playerArtFg.src = imageUrl;
+                        playerArtBg.style.backgroundImage = `url(${imageUrl})`;
+
+                        playerArtFg.addEventListener('load', () => {
+                            try {
+                                const dominantColor = colorThief.getColor(playerArtFg);
+                                const textColor = getContrastYIQ(dominantColor);
+                                playerContainer.style.setProperty('--player-bg', `rgb(${dominantColor.join(',')})`);
+                                playerContainer.style.setProperty('--player-text', textColor);
+                                playerContainer.style.setProperty('--player-text-muted', textColor === '#dfe6e9' ? '#b2bec3' : '#636e72');
+                            } catch (e) {
+                                playerContainer.style.setProperty('--player-bg', '#2d3436');
+                            }
+                        }, { once: true });
+                    }
+                } catch (error) {
+                    console.error("Error fetching Now Playing data:", error);
+                }
+            };
 
             const scheduleApiUrl = `/.netlify/functions/get-schedule`;
             const visitorTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -271,7 +301,7 @@
                             if (show.relationships.personas && show.relationships.personas.data.length > 0) {
                                 const djNames = show.relationships.personas.data
                                     .map(pRef => personasMap.get(pRef.id))
-                                    .filter(Boolean); // Filter out any undefined names
+                                    .filter(Boolean);
                                 if (djNames.length > 0) djName = djNames.join(' & ');
                             }
 
