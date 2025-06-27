@@ -249,7 +249,6 @@
                 const date = new Date(dateStr);
                 return new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit', timeZone: visitorTimeZone }).format(date);
             };
-
             const fetchSchedule = async () => {
                 try {
                     const response = await fetch(scheduleApiUrl);
