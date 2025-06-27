@@ -176,3 +176,13 @@ body {
     border-radius: 0.5rem;
     overflow: hidden;
 }
+
+#globe-container {
+    height: 500px;
+    cursor: grab;
+}
+
+#listener-list {
+    max-height: 500px;
+    overflow-y: auto;
+}
