@@ -10,8 +10,8 @@ exports.handler = async function (event, context) {
         };
     }
 
-    // Fetch the last 6 spins. The first is "now playing", the next 5 are recent.
-    const spinitronApiUrl = `https://spinitron.com/api/spins?access-token=${spinitronApiKey}&station=kuaa&count=6`;
+    // Fetch the last 50 spins for the playlist page.
+    const spinitronApiUrl = `https://spinitron.com/api/spins?access-token=${spinitronApiKey}&station=kuaa&count=50`;
 
     try {
         const response = await fetch(spinitronApiUrl);

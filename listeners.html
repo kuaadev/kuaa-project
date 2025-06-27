@@ -23,6 +23,7 @@
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav ms-auto align-items-center">
                         <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                        <li class="nav-item"><a class="nav-link" href="playlist.html">Playlist</a></li>
                         <li class="nav-item"><a class="nav-link active" href="listeners.html">Listeners</a></li>
                         <li class="nav-item"><a class="nav-link" href="index.html#schedule">Schedule</a></li>
                     </ul>
@@ -44,7 +45,6 @@
                             <p>Now reaching <strong id="listener-count">0</strong> listeners across the globe. Join our
                                 community!</p>
                             <div id="listener-list" class="list-group">
-                                <!-- Listener list would be populated here if geolocation was fully implemented -->
                                 <p class="text-muted small">Listener list feature is currently in development.</p>
                             </div>
                         </div>
@@ -76,10 +76,7 @@
             globeContainer.appendChild(renderer.domElement);
 
             const geometry = new THREE.SphereGeometry(2, 64, 64);
-            const material = new THREE.MeshPhongMaterial({
-                color: 0x457B9D,
-                shininess: 5,
-            });
+            const material = new THREE.MeshPhongMaterial({ color: 0x457B9D, shininess: 5 });
             const earth = new THREE.Mesh(geometry, material);
             scene.add(earth);
 
