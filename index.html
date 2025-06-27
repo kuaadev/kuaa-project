@@ -199,261 +199,264 @@
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-        const colorThief = new ColorThief();
+        // All code is now safely inside the DOMContentLoaded listener.
+        document.addEventListener('DOMContentLoaded', () => {
+            const colorThief = new ColorThief();
 
-        // --- PLAYER CONTROLS ---
-        const audioPlayer = document.getElementById('audio-player');
-        const playPauseBtn = document.getElementById('play-pause-btn');
-        const playPauseIcon = document.getElementById('play-pause-icon');
-        const navPlayBtn = document.getElementById('nav-play-btn');
-        const navPlayIcon = document.getElementById('nav-play-icon');
-        const volumeBtn = document.getElementById('volume-btn');
-        const volumeIcon = document.getElementById('volume-icon');
+            // --- PLAYER CONTROLS ---
+            const audioPlayer = document.getElementById('audio-player');
+            const playPauseBtn = document.getElementById('play-pause-btn');
+            const playPauseIcon = document.getElementById('play-pause-icon');
+            const navPlayBtn = document.getElementById('nav-play-btn');
+            const navPlayIcon = document.getElementById('nav-play-icon');
+            const volumeBtn = document.getElementById('volume-btn');
+            const volumeIcon = document.getElementById('volume-icon');
 
-        function togglePlay() {
-            if (audioPlayer.paused) {
-                audioPlayer.play().catch(e => console.error("Play initiation failed:", e));
-            } else {
-                audioPlayer.pause();
-            }
-        }
-
-        function updatePlayIcons() {
-            const isPlaying = !audioPlayer.paused;
-            playPauseIcon.className = isPlaying ? 'bi bi-pause-fill' : 'bi bi-play-fill';
-            navPlayIcon.className = isPlaying ? 'bi bi-pause-fill' : 'bi bi-play-fill';
-        }
-
-        function toggleMute() {
-            audioPlayer.muted = !audioPlayer.muted;
-            volumeIcon.className = audioPlayer.muted ? 'bi bi-volume-mute-fill' : 'bi bi-volume-up-fill';
-        }
-
-        playPauseBtn.addEventListener('click', togglePlay);
-        navPlayBtn.addEventListener('click', togglePlay);
-        volumeBtn.addEventListener('click', toggleMute);
-        audioPlayer.addEventListener('play', updatePlayIcons);
-        audioPlayer.addEventListener('pause', updatePlayIcons);
-        audioPlayer.addEventListener('volumechange', () => {
-            volumeIcon.className = audioPlayer.muted || audioPlayer.volume === 0 ? 'bi bi-volume-mute-fill' : 'bi bi-volume-up-fill';
-        });
-
-        // --- NOW PLAYING ---
-        const nowPlayingApiUrl = `/.netlify/functions/get-now-playing`;
-        const playerContainer = document.getElementById('player-container');
-        const playerShow = document.getElementById('player-show');
-        const playerSong = document.getElementById('player-song');
-        const playerArtist = document.getElementById('player-artist');
-        const playerArtBg = document.getElementById('player-art-bg');
-        const playerArtFg = document.getElementById('player-art-fg');
-
-        const fetchNowPlaying = async () => {
-            try {
-                const response = await fetch(nowPlayingApiUrl);
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                const data = await response.json();
-
-                if (data.show) {
-                    const showName = data.show.title || 'Community Programming';
-                    const djName = (data.show.personas && data.show.personas.length > 0)
-                        ? data.show.personas.map(p => p.name).join(' & ')
-                        : 'KUAA';
-                    playerShow.textContent = `${showName} with ${djName}`;
-                }
-
-                playerSong.textContent = data.song || 'Music Variety';
-                playerArtist.textContent = data.artist || 'Various Artists';
-
-                const imageUrl = data.image || 'https://placehold.co/200/2d3436/dfe6e9?text=KUAA';
-                if (playerArtFg.src !== imageUrl) {
-                    playerArtFg.src = imageUrl;
-                    playerArtBg.style.backgroundImage = `url(${imageUrl})`;
-
-                    playerArtFg.addEventListener('load', () => {
-                        try {
-                            const dominantColor = colorThief.getColor(playerArtFg);
-                            const rgbColor = `rgb(${dominantColor.join(',')})`;
-                            playerContainer.style.setProperty('--player-bg', rgbColor);
-                        } catch (e) {
-                            playerContainer.style.setProperty('--player-bg', '#2d3436');
-                        }
-                    }, { once: true });
-                }
-            } catch (error) {
-                console.error("Error fetching Now Playing data:", error);
-            }
-        };
-
-        // --- RECENT SPINS ---
-        const recentSpinsApiUrl = `/.netlify/functions/get-recent-spins`;
-        const recentSpinsContainer = document.getElementById('recent-spins-container');
-
-        const fetchRecentSpins = async () => {
-            try {
-                const response = await fetch(recentSpinsApiUrl);
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                const data = await response.json();
-
-                if (data.items && data.items.length > 1) {
-                    const recent = data.items.slice(1);
-                    let recentHtml = '';
-                    recent.forEach(spin => {
-                        recentHtml += `
-                            <div class="list-group-item list-group-item-action d-flex align-items-center recent-spin-item">
-                                <img src="${spin.image || 'https://placehold.co/50x50/A8DADC/1D3557?text=?'}" class="rounded me-3" alt="Album art">
-                                <div class="flex-grow-1">
-                                    <div class="fw-bold">${spin.song || 'Untitled'}</div>
-                                    <div>${spin.artist || 'Unknown Artist'}</div>
-                                </div>
-                            </div>`;
-                    });
-                    recentSpinsContainer.innerHTML = recentHtml;
+            function togglePlay() {
+                if (audioPlayer.paused) {
+                    audioPlayer.play().catch(e => console.error("Play initiation failed:", e));
                 } else {
-                    recentSpinsContainer.innerHTML = '<p class="text-center p-3">No recent songs to display.</p>';
+                    audioPlayer.pause();
                 }
-            } catch (error) {
-                console.error("Error fetching recent spins:", error);
             }
-        };
 
-        // --- SCHEDULE ---
-        const scheduleApiUrl = `/.netlify/functions/get-schedule`;
-        const visitorTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        const formatTime = (dateStr) => {
-            const date = new Date(dateStr);
-            return new Intl.DateTimeFormat('en-US', {
-                hour: 'numeric',
-                minute: '2-digit',
-                timeZone: visitorTimeZone
-            }).format(date);
-        };
-        const fetchSchedule = async () => {
-            try {
-                const response = await fetch(scheduleApiUrl);
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                const scheduleData = await response.json();
-                const shows = scheduleData.items;
-
-                const showsByDay = { 0: [], 1: [], 2: [], 3: [], 4: [], 5: [], 6: [] };
-                shows.forEach(show => {
-                    const showDate = new Date(show.start);
-                    const dayOfWeek = showDate.getDay();
-                    showsByDay[dayOfWeek].push(show);
-                });
-
-                for (const day in showsByDay) {
-                    showsByDay[day].sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
-                }
-
-                renderSchedule(showsByDay);
-
-            } catch (error) {
-                console.error("Error fetching schedule:", error);
+            function updatePlayIcons() {
+                const isPlaying = !audioPlayer.paused;
+                playPauseIcon.className = isPlaying ? 'bi bi-pause-fill' : 'bi bi-play-fill';
+                navPlayIcon.className = isPlaying ? 'bi bi-pause-fill' : 'bi bi-play-fill';
             }
-        };
-        const renderSchedule = (showsByDay) => {
-            const dayMap = { 0: 'sunday', 1: 'monday', 2: 'tuesday', 3: 'wednesday', 4: 'thursday', 5: 'friday', 6: 'saturday' };
-            for (const dayIndex in dayMap) {
-                const dayName = dayMap[dayIndex];
-                const container = document.getElementById(dayName);
-                const dayShows = showsByDay[dayIndex];
 
-                if (!container) continue;
+            function toggleMute() {
+                audioPlayer.muted = !audioPlayer.muted;
+                volumeIcon.className = audioPlayer.muted ? 'bi bi-volume-mute-fill' : 'bi bi-volume-up-fill';
+            }
 
-                if (dayShows.length === 0) {
-                    container.innerHTML = '<p class="text-center p-3">No shows scheduled for today.</p>';
-                } else {
-                    let tableHTML = `<table class="table table-striped table-hover">
-                        <thead class="table-dark"><tr><th>Time</th><th>Show</th><th>DJ/Host</th></tr></thead><tbody>`;
-                    dayShows.forEach(show => {
-                        const djName = (show.personas && show.personas.length > 0)
-                            ? show.personas.map(p => p.name).join(' & ')
+            playPauseBtn.addEventListener('click', togglePlay);
+            navPlayBtn.addEventListener('click', togglePlay);
+            volumeBtn.addEventListener('click', toggleMute);
+            audioPlayer.addEventListener('play', updatePlayIcons);
+            audioPlayer.addEventListener('pause', updatePlayIcons);
+            audioPlayer.addEventListener('volumechange', () => {
+                volumeIcon.className = audioPlayer.muted || audioPlayer.volume === 0 ? 'bi bi-volume-mute-fill' : 'bi bi-volume-up-fill';
+            });
+
+            // --- NOW PLAYING ---
+            const nowPlayingApiUrl = `/.netlify/functions/get-now-playing`;
+            const playerContainer = document.getElementById('player-container');
+            const playerShow = document.getElementById('player-show');
+            const playerSong = document.getElementById('player-song');
+            const playerArtist = document.getElementById('player-artist');
+            const playerArtBg = document.getElementById('player-art-bg');
+            const playerArtFg = document.getElementById('player-art-fg');
+
+            const fetchNowPlaying = async () => {
+                try {
+                    const response = await fetch(nowPlayingApiUrl);
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    const data = await response.json();
+
+                    if (data.show) {
+                        const showName = data.show.title || 'Community Programming';
+                        const djName = (data.show.personas && data.show.personas.length > 0)
+                            ? data.show.personas.map(p => p.name).join(' & ')
                             : 'KUAA';
+                        playerShow.textContent = `${showName} with ${djName}`;
+                    }
 
-                        tableHTML += `<tr>
-                            <td>${formatTime(show.start)} - ${formatTime(show.end)}</td>
-                            <td>${show.title || 'Untitled Show'}</td>
-                            <td>${djName}</td>
-                        </tr>`;
-                    });
-                    tableHTML += `</tbody></table>`;
-                    container.innerHTML = tableHTML;
+                    playerSong.textContent = data.song || 'Music Variety';
+                    playerArtist.textContent = data.artist || 'Various Artists';
+
+                    const imageUrl = data.image || 'https://placehold.co/200/2d3436/dfe6e9?text=KUAA';
+                    if (playerArtFg.src !== imageUrl) {
+                        playerArtFg.src = imageUrl;
+                        playerArtBg.style.backgroundImage = `url(${imageUrl})`;
+
+                        playerArtFg.addEventListener('load', () => {
+                            try {
+                                const dominantColor = colorThief.getColor(playerArtFg);
+                                const rgbColor = `rgb(${dominantColor.join(',')})`;
+                                playerContainer.style.setProperty('--player-bg', rgbColor);
+                            } catch (e) {
+                                playerContainer.style.setProperty('--player-bg', '#2d3436');
+                            }
+                        }, { once: true });
+                    }
+                } catch (error) {
+                    console.error("Error fetching Now Playing data:", error);
                 }
+            };
+
+            // --- RECENT SPINS ---
+            const recentSpinsApiUrl = `/.netlify/functions/get-recent-spins`;
+            const recentSpinsContainer = document.getElementById('recent-spins-container');
+            const fetchRecentSpins = async () => {
+                try {
+                    const response = await fetch(recentSpinsApiUrl);
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    const data = await response.json();
+
+                    if (data.items && data.items.length > 1) {
+                        const recent = data.items.slice(1);
+                        let recentHtml = '';
+                        recent.forEach(spin => {
+                            recentHtml += `
+                                <div class="list-group-item list-group-item-action d-flex align-items-center recent-spin-item">
+                                    <img src="${spin.image || 'https://placehold.co/50x50/A8DADC/1D3557?text=?'}" class="rounded me-3" alt="Album art">
+                                    <div class="flex-grow-1">
+                                        <div class="fw-bold">${spin.song || 'Untitled'}</div>
+                                        <div>${spin.artist || 'Unknown Artist'}</div>
+                                    </div>
+                                </div>`;
+                        });
+                        recentSpinsContainer.innerHTML = recentHtml;
+                    } else {
+                        recentSpinsContainer.innerHTML = '<p class="text-center p-3">No recent songs to display.</p>';
+                    }
+                } catch (error) {
+                    console.error("Error fetching recent spins:", error);
+                }
+            };
+
+            // --- SCHEDULE ---
+            const scheduleApiUrl = `/.netlify/functions/get-schedule`;
+            const visitorTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const formatTime = (dateStr) => {
+                const date = new Date(dateStr);
+                return new Intl.DateTimeFormat('en-US', {
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    timeZoneName: 'short',
+                    timeZone: visitorTimeZone
+                }).format(date);
+            };
+            const fetchSchedule = async () => {
+                try {
+                    const response = await fetch(scheduleApiUrl);
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    const scheduleData = await response.json();
+                    const shows = scheduleData.items;
+
+                    const showsByDay = { 0: [], 1: [], 2: [], 3: [], 4: [], 5: [], 6: [] };
+                    shows.forEach(show => {
+                        const showDate = new Date(show.start);
+                        const dayOfWeek = showDate.getDay();
+                        showsByDay[dayOfWeek].push(show);
+                    });
+
+                    for (const day in showsByDay) {
+                        showsByDay[day].sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
+                    }
+
+                    renderSchedule(showsByDay);
+
+                } catch (error) {
+                    console.error("Error fetching schedule:", error);
+                }
+            };
+            const renderSchedule = (showsByDay) => {
+                const dayMap = { 0: 'sunday', 1: 'monday', 2: 'tuesday', 3: 'wednesday', 4: 'thursday', 5: 'friday', 6: 'saturday' };
+                for (const dayIndex in dayMap) {
+                    const dayName = dayMap[dayIndex];
+                    const container = document.getElementById(dayName);
+                    const dayShows = showsByDay[dayIndex];
+
+                    if (!container) continue;
+
+                    if (dayShows.length === 0) {
+                        container.innerHTML = '<p class="text-center p-3">No shows scheduled for today.</p>';
+                    } else {
+                        let tableHTML = `<table class="table table-striped table-hover">
+                            <thead class="table-dark"><tr><th>Time</th><th>Show</th><th>DJ/Host</th></tr></thead><tbody>`;
+                        dayShows.forEach(show => {
+                            const djName = (show.personas && show.personas.length > 0)
+                                ? show.personas.map(p => p.name).join(' & ')
+                                : 'KUAA';
+
+                            tableHTML += `<tr>
+                                <td>${formatTime(show.start)} - ${formatTime(show.end)}</td>
+                                <td>${show.title || 'Untitled Show'}</td>
+                                <td>${djName}</td>
+                            </tr>`;
+                        });
+                        tableHTML += `</tbody></table>`;
+                        container.innerHTML = tableHTML;
+                    }
+                }
+            };
+
+            // --- GLOBE ---
+            const globeContainer = document.getElementById('globe-container');
+            const listenerCountEl = document.getElementById('listener-count');
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, globeContainer.clientWidth / globeContainer.clientHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(globeContainer.clientWidth, globeContainer.clientHeight);
+            globeContainer.appendChild(renderer.domElement);
+
+            const geometry = new THREE.SphereGeometry(2, 64, 64);
+            const material = new THREE.MeshPhongMaterial({
+                color: 0x457B9D,
+                shininess: 5,
+            });
+            const earth = new THREE.Mesh(geometry, material);
+            scene.add(earth);
+
+            camera.position.z = 4;
+            const controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.enablePan = false;
+            controls.minDistance = 3;
+            controls.maxDistance = 6;
+
+            const light = new THREE.DirectionalLight(0xffffff, 2);
+            light.position.set(5, 3, 5);
+            scene.add(light);
+            scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+
+            function animate() {
+                requestAnimationFrame(animate);
+                controls.update();
+                earth.rotation.y += 0.0005;
+                renderer.render(scene, camera);
             }
-        };
+            animate();
 
-        // --- GLOBE ---
-        const globeContainer = document.getElementById('globe-container');
-        const listenerCountEl = document.getElementById('listener-count');
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, globeContainer.clientWidth / globeContainer.clientHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-        renderer.setSize(globeContainer.clientWidth, globeContainer.clientHeight);
-        globeContainer.appendChild(renderer.domElement);
+            const fetchListeners = async () => {
+                try {
+                    const response = await fetch('/.netlify/functions/get-listeners');
+                    const data = await response.json();
+                    listenerCountEl.textContent = data.count || 0;
+                } catch (e) {
+                    console.error("Error fetching listeners:", e);
+                    listenerCountEl.textContent = 'N/A';
+                }
+            };
 
-        const geometry = new THREE.SphereGeometry(2, 64, 64);
-        const material = new THREE.MeshPhongMaterial({
-            color: 0x457B9D,
-            shininess: 5,
-        });
-        const earth = new THREE.Mesh(geometry, material);
-        scene.add(earth);
+            // --- INITIALIZE ---
+            fetchNowPlaying();
+            fetchRecentSpins();
+            fetchSchedule();
+            fetchListeners();
+            setInterval(fetchNowPlaying, 20000);
+            setInterval(fetchRecentSpins, 60000);
+            setInterval(fetchListeners, 30000);
 
-        camera.position.z = 4;
-        const controls = new OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.enablePan = false;
-        controls.minDistance = 3;
-        controls.maxDistance = 6;
-
-        const light = new THREE.DirectionalLight(0xffffff, 2);
-        light.position.set(5, 3, 5);
-        scene.add(light);
-        scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-
-        function animate() {
-            requestAnimationFrame(animate);
-            controls.update();
-            earth.rotation.y += 0.0005;
-            renderer.render(scene, camera);
-        }
-        animate();
-
-        const fetchListeners = async () => {
-            try {
-                const response = await fetch('/.netlify/functions/get-listeners');
-                const data = await response.json();
-                listenerCountEl.textContent = data.count || 0;
-            } catch (e) {
-                console.error("Error fetching listeners:", e);
-                listenerCountEl.textContent = 'N/A';
+            // Set Today's Tab as Active
+            const todayIndex = new Date().getDay();
+            const dayMap = { 0: 'sunday', 1: 'monday', 2: 'tuesday', 3: 'wednesday', 4: 'thursday', 5: 'friday', 6: 'saturday' };
+            const todayTab = document.getElementById(`${dayMap[todayIndex]}-tab`);
+            if (todayTab) {
+                const tab = new bootstrap.Tab(todayTab);
+                tab.show();
             }
-        };
 
-        // --- INITIALIZE ---
-        fetchNowPlaying();
-        fetchRecentSpins();
-        fetchSchedule();
-        fetchListeners();
-        setInterval(fetchNowPlaying, 20000);
-        setInterval(fetchRecentSpins, 60000);
-        setInterval(fetchListeners, 30000);
-
-        // Set Today's Tab as Active
-        const todayIndex = new Date().getDay();
-        const dayMap = { 0: 'sunday', 1: 'monday', 2: 'tuesday', 3: 'wednesday', 4: 'thursday', 5: 'friday', 6: 'saturday' };
-        const todayTab = document.getElementById(`${dayMap[todayIndex]}-tab`);
-        if (todayTab) {
-            const tab = new bootstrap.Tab(todayTab);
-            tab.show();
-        }
-
-        // --- SMOOTH SCROLL ---
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                if (this.getAttribute('data-bs-toggle') === 'tab' || this.id === 'nav-play-btn') return;
-                e.preventDefault();
-                document.querySelector(this.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
+            // --- SMOOTH SCROLL ---
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    if (this.getAttribute('data-bs-toggle') === 'tab' || this.id === 'nav-play-btn') return;
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
+                });
             });
         });
     </script>
