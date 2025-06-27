@@ -271,7 +271,7 @@
                     const data = await response.json();
 
                     if (data.items && data.items.length > 1) {
-                        const recent = data.items.slice(1, 21); // Get next 20 songs
+                        const recent = data.items.slice(1, 21);
                         let recentHtml = '';
                         recent.forEach(spin => {
                             recentHtml += `
@@ -304,8 +304,60 @@
                     timeZone: visitorTimeZone
                 }).format(date);
             };
-            const fetchSchedule = async () => { /* ... */ };
-            const renderSchedule = (showsByDay) => { /* ... */ };
+            const fetchSchedule = async () => {
+                try {
+                    const response = await fetch(scheduleApiUrl);
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    const scheduleData = await response.json();
+                    const shows = scheduleData.items;
+
+                    const showsByDay = { 0: [], 1: [], 2: [], 3: [], 4: [], 5: [], 6: [] };
+                    shows.forEach(show => {
+                        const showDate = new Date(show.start);
+                        const dayOfWeek = showDate.getDay();
+                        showsByDay[dayOfWeek].push(show);
+                    });
+
+                    for (const day in showsByDay) {
+                        showsByDay[day].sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
+                    }
+
+                    renderSchedule(showsByDay);
+
+                } catch (error) {
+                    console.error("Error fetching schedule:", error);
+                }
+            };
+            const renderSchedule = (showsByDay) => {
+                const dayMap = { 0: 'sunday', 1: 'monday', 2: 'tuesday', 3: 'wednesday', 4: 'thursday', 5: 'friday', 6: 'saturday' };
+                for (const dayIndex in dayMap) {
+                    const dayName = dayMap[dayIndex];
+                    const container = document.getElementById(dayName);
+                    const dayShows = showsByDay[dayIndex];
+
+                    if (!container) continue;
+
+                    if (dayShows.length === 0) {
+                        container.innerHTML = '<p class="text-center p-3">No shows scheduled for today.</p>';
+                    } else {
+                        let tableHTML = `<table class="table table-striped table-hover">
+                            <thead class="table-dark"><tr><th>Time</th><th>Show</th><th>DJ/Host</th></tr></thead><tbody>`;
+                        dayShows.forEach(show => {
+                            const djName = (show.personas && show.personas.length > 0)
+                                ? show.personas.map(p => p.name).join(' & ')
+                                : 'KUAA';
+
+                            tableHTML += `<tr>
+                                <td>${formatTime(show.start)} - ${formatTime(show.end)}</td>
+                                <td>${show.title || 'Untitled Show'}</td>
+                                <td>${djName}</td>
+                            </tr>`;
+                        });
+                        tableHTML += `</tbody></table>`;
+                        container.innerHTML = tableHTML;
+                    }
+                }
+            };
 
             // --- INITIALIZE ---
             fetchNowPlaying();
