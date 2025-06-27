@@ -1,7 +1,6 @@
 const fetch = require('node-fetch');
 
 exports.handler = async function (event, context) {
-    // The public JSON stats URL for the Icecast stream
     const streamStatsUrl = 'https://stream.xmission.com/status-json.xsl';
 
     try {
@@ -11,23 +10,23 @@ exports.handler = async function (event, context) {
         }
         const data = await response.json();
 
-        // Find the correct mountpoint for KUAA
-        const mountpoint = data.icestats.source.find(s => s.listenurl.includes('kuaa'));
-
-        if (!mountpoint || !mountpoint.listeners) {
-            return { statusCode: 200, body: JSON.stringify([]) }; // No listeners or mountpoint not found
+        // Add robust checking for the data structure
+        if (!data || !data.icestats || !data.icestats.source) {
+            return { statusCode: 500, body: JSON.stringify({ error: "Unexpected stats format from stream server." }) };
         }
 
-        // We can't geolocate IPs on the server-side without an API key for a geolocation service.
-        // Instead, we will pass the raw list back and let the front-end decide how to handle it,
-        // or just display the count. For this demo, we'll just send back the count.
-        // A full implementation would use a service like geo.ipify.org or ipstack.com here.
+        // Ensure source is an array before using .find()
+        const sourceArray = Array.isArray(data.icestats.source) ? data.icestats.source : [data.icestats.source];
+        const mountpoint = sourceArray.find(s => s && s.listenurl && s.listenurl.includes('kuaa'));
 
-        const listenerCount = mountpoint.listeners;
+        if (!mountpoint) {
+            // If the kuaa mountpoint isn't found, return a count of 0.
+            return { statusCode: 200, body: JSON.stringify({ count: 0 }) };
+        }
+
+        const listenerCount = mountpoint.listeners || 0;
         const listenerInfo = {
             count: listenerCount,
-            // In a real application, you would process and geolocate listener IPs here.
-            // For this example, we are just returning a count.
         };
 
         return {
