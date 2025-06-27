@@ -6,32 +6,21 @@ exports.handler = async function (event, context) {
         return { statusCode: 500, body: JSON.stringify({ error: "Spinitron API key is not configured." }) };
     }
 
-    // This is the direct and correct endpoint for fetching a list of all DJ personas.
-    const personasUrl = `https://spinitron.com/api/personas?access-token=${spinitronApiKey}&station=kuaa&count=200`;
+    // This function now only fetches the raw schedule data. 
+    // All processing is moved to the djs.html page for reliability.
+    const showsUrl = `https://spinitron.com/api/shows?access-token=${spinitronApiKey}&station=kuaa&count=200&with=personas`;
 
     try {
-        const response = await fetch(personasUrl, { timeout: 9000 });
+        const response = await fetch(showsUrl, { timeout: 9000 });
         if (!response.ok) {
             return { statusCode: response.status, body: JSON.stringify({ error: `Spinitron API error: ${response.statusText}` }) };
         }
 
         const data = await response.json();
 
-        // Map the data to the format the frontend expects (name, bio, image at the top level).
-        const djsArray = data.items.map(dj => ({
-            id: dj.id,
-            name: dj.attributes.name,
-            bio: dj.attributes.bio,
-            image: dj.attributes.image
-        }));
-
-        const responseData = {
-            items: djsArray
-        };
-
         return {
             statusCode: 200,
-            body: JSON.stringify(responseData)
+            body: JSON.stringify(data)
         };
     } catch (error) {
         console.error("Error in get-djs function:", error);

@@ -69,7 +69,6 @@
         function initializeDjsPage() {
             const djsContainer = document.getElementById('djs-container');
             const djsApiUrl = `/.netlify/functions/get-djs`;
-            const scheduleApiUrl = `/.netlify/functions/get-schedule`;
 
             const formatShowTime = (dateStr) => {
                 const date = new Date(dateStr);
@@ -81,54 +80,54 @@
 
             const fetchAndProcessDjs = async () => {
                 try {
-                    // Fetch both DJs and Schedule at the same time
-                    const [djsResponse, scheduleResponse] = await Promise.all([
-                        fetch(djsApiUrl),
-                        fetch(scheduleApiUrl)
-                    ]);
+                    const response = await fetch(djsApiUrl);
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    const scheduleData = await response.json();
 
-                    if (!djsResponse.ok || !scheduleResponse.ok) {
-                        throw new Error('Failed to fetch necessary data.');
-                    }
-
-                    const djsData = await djsResponse.json();
-                    const scheduleData = await scheduleResponse.json();
-
-                    const allDjs = djsData.items || [];
                     const shows = scheduleData.data || [];
+                    const includedData = scheduleData.included || [];
                     const now = new Date();
 
-                    // Step 1: Get a Set of all Persona IDs that have a show on the schedule
-                    const activePersonaIds = new Set();
-                    shows.forEach(show => {
-                        if (show.relationships.personas && show.relationships.personas.data) {
-                            show.relationships.personas.data.forEach(pRef => activePersonaIds.add(pRef.id));
+                    const djsMap = new Map();
+
+                    // Step 1: Populate the map with all unique DJs from the 'included' data
+                    includedData.forEach(item => {
+                        if (item.type === 'personas') {
+                            djsMap.set(item.id, {
+                                id: item.id,
+                                name: item.attributes.name,
+                                bio: item.attributes.bio,
+                                image: item.attributes.image,
+                                onAir: false,
+                                nextShowTime: null
+                            });
                         }
                     });
 
-                    // Step 2: Filter the main DJ list to only include active DJs
-                    let activeDjs = allDjs.filter(dj => activePersonaIds.has(dj.id));
+                    // Step 2: Iterate through shows to find the status and next air time for each DJ
+                    shows.forEach(show => {
+                        if (show.relationships.personas && show.relationships.personas.data.length > 0) {
+                            show.relationships.personas.data.forEach(personaRef => {
+                                const dj = djsMap.get(personaRef.id);
+                                if (dj) {
+                                    const startTime = new Date(show.attributes.start);
+                                    const endTime = new Date(show.attributes.end);
 
-                    // Step 3: Add status and next show time to each active DJ
-                    activeDjs.forEach(dj => {
-                        dj.nextShowTime = null;
-                        dj.onAir = false;
-                        shows.forEach(show => {
-                            const personaIdsInShow = (show.relationships.personas.data || []).map(p => p.id);
-                            if (personaIdsInShow.includes(dj.id)) {
-                                const startTime = new Date(show.attributes.start);
-                                const endTime = new Date(show.attributes.end);
-                                if (now >= startTime && now < endTime) {
-                                    dj.onAir = true;
-                                    dj.nextShowTime = startTime;
-                                } else if (startTime > now && (!dj.nextShowTime || startTime < dj.nextShowTime)) {
-                                    dj.nextShowTime = startTime;
+                                    if (now >= startTime && now < endTime) {
+                                        dj.onAir = true;
+                                        dj.nextShowTime = startTime;
+                                    } else if (startTime > now && (!dj.nextShowTime || startTime < dj.nextShowTime)) {
+                                        dj.nextShowTime = startTime;
+                                    }
                                 }
-                            }
-                        });
+                            });
+                        }
                     });
 
-                    // Step 4: Sort the final list
+                    // Step 3: Filter out DJs who don't have a show on the schedule
+                    const activeDjs = Array.from(djsMap.values()).filter(dj => dj.nextShowTime !== null || dj.onAir);
+
+                    // Step 4: Sort the active DJs
                     activeDjs.sort((a, b) => {
                         if (a.onAir) return -1;
                         if (b.onAir) return 1;
