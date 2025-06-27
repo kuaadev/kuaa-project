@@ -24,7 +24,7 @@ exports.handler = async function (event, context) {
                 if (show.personas && show.personas.length > 0) {
                     show.personas.forEach(dj => {
                         // Use a Map to prevent duplicate DJs
-                        if (!uniqueDjs.has(dj.id)) {
+                        if (dj && dj.id && !uniqueDjs.has(dj.id)) {
                             uniqueDjs.set(dj.id, dj);
                         }
                     });
