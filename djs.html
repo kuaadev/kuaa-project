@@ -70,6 +70,14 @@
             const djsContainer = document.getElementById('djs-container');
             const djsApiUrl = `/.netlify/functions/get-djs`;
 
+            const formatShowTime = (dateStr) => {
+                const date = new Date(dateStr);
+                const visitorTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                const day = new Intl.DateTimeFormat('en-US', { weekday: 'long', timeZone: visitorTimeZone }).format(date);
+                const time = new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit', timeZone: visitorTimeZone }).format(date);
+                return `${day} at ${time}`;
+            };
+
             const fetchDjs = async () => {
                 try {
                     const response = await fetch(djsApiUrl);
@@ -77,17 +85,23 @@
                     const data = await response.json();
 
                     if (data.items && data.items.length > 0) {
-                        const sortedDjs = data.items
-                            .filter(dj => dj.name) // Make sure DJ has a name
-                            .sort((a, b) => a.name.localeCompare(b.name));
-
-                        if (sortedDjs.length === 0) {
-                            djsContainer.innerHTML = '<p class="text-center p-3">Could not find any active DJs.</p>';
-                            return;
-                        }
+                        const sortedDjs = data.items.sort((a, b) => {
+                            if (a.onAir) return -1; // a comes first
+                            if (b.onAir) return 1;  // b comes first
+                            if (!a.nextShowTime) return 1; // a goes to end
+                            if (!b.nextShowTime) return -1; // b goes to end
+                            return new Date(a.nextShowTime) - new Date(b.nextShowTime);
+                        });
 
                         let djsHtml = '';
                         sortedDjs.forEach(dj => {
+                            let statusHtml = '';
+                            if (dj.onAir) {
+                                statusHtml = `<div class="card-footer bg-danger text-white fw-bold">ON AIR NOW</div>`;
+                            } else if (dj.nextShowTime) {
+                                statusHtml = `<div class="card-footer">Next up: ${formatShowTime(dj.nextShowTime)}</div>`;
+                            }
+
                             djsHtml += `
                                 <div class="col-md-6 col-lg-4 col-xl-3">
                                     <div class="card h-100 text-center">
@@ -96,6 +110,7 @@
                                             <h5 class="card-title fw-bold">${dj.name}</h5>
                                             <p class="card-text small text-muted flex-grow-1">${dj.bio ? dj.bio.substring(0, 100) + '...' : ''}</p>
                                         </div>
+                                        ${statusHtml}
                                     </div>
                                 </div>
                             `;

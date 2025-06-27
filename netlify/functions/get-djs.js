@@ -6,7 +6,6 @@ exports.handler = async function (event, context) {
         return { statusCode: 500, body: JSON.stringify({ error: "Spinitron API key is not configured." }) };
     }
 
-    // Fetch the full schedule with personas included
     const showsUrl = `https://spinitron.com/api/shows?access-token=${spinitronApiKey}&station=kuaa&count=200&with=personas`;
 
     try {
@@ -16,34 +15,56 @@ exports.handler = async function (event, context) {
         }
         const scheduleData = await response.json();
 
-        // The related DJ/persona data is in the top-level 'included' array
-        const includedData = scheduleData.included || [];
         const shows = scheduleData.data || [];
-
+        const included = scheduleData.included || [];
         const uniqueDjs = new Map();
+        const now = new Date();
 
-        // Go through each show on the schedule
+        // Step 1: Extract all unique DJs from the schedule
         shows.forEach(show => {
-            // Check if the show has a relationship to any personas
-            if (show.relationships.personas && show.relationships.personas.data) {
+            if (show.relationships.personas && show.relationships.personas.data.length > 0) {
                 show.relationships.personas.data.forEach(personaRef => {
-                    // Find the full persona object in the 'included' array using its ID
-                    const persona = includedData.find(inc => inc.type === 'personas' && inc.id === personaRef.id);
-                    // If we find the DJ and haven't already added them, add them to our map
-                    if (persona && !uniqueDjs.has(persona.id)) {
-                        uniqueDjs.set(persona.id, persona);
+                    if (!uniqueDjs.has(personaRef.id)) {
+                        const persona = included.find(inc => inc.type === 'personas' && inc.id === personaRef.id);
+                        if (persona) {
+                            uniqueDjs.set(persona.id, {
+                                id: persona.id,
+                                name: persona.attributes.name,
+                                bio: persona.attributes.bio,
+                                image: persona.attributes.image,
+                                nextShowTime: null, // Initialize next show time
+                                onAir: false
+                            });
+                        }
                     }
                 });
             }
         });
 
-        // Convert the Map of unique DJs back into an array of objects the frontend can use.
-        const djsArray = Array.from(uniqueDjs.values()).map(dj => ({
-            id: dj.id,
-            name: dj.attributes.name,
-            bio: dj.attributes.bio,
-            image: dj.attributes.image
-        }));
+        // Step 2: Find the "On Air" show and the "Next Up" time for each DJ
+        shows.forEach(show => {
+            const startTime = new Date(show.attributes.start);
+            const endTime = new Date(show.attributes.end);
+
+            if (show.relationships.personas && show.relationships.personas.data.length > 0) {
+                show.relationships.personas.data.forEach(personaRef => {
+                    const dj = uniqueDjs.get(personaRef.id);
+                    if (!dj) return;
+
+                    // Check if this show is currently on air
+                    if (now >= startTime && now < endTime) {
+                        dj.onAir = true;
+                        dj.nextShowTime = startTime; // The current show is the "next" for sorting purposes
+                    }
+                    // Find the soonest upcoming show for this DJ
+                    else if (startTime > now && (!dj.nextShowTime || startTime < dj.nextShowTime)) {
+                        dj.nextShowTime = startTime;
+                    }
+                });
+            }
+        });
+
+        const djsArray = Array.from(uniqueDjs.values());
 
         const responseData = {
             items: djsArray
@@ -55,9 +76,6 @@ exports.handler = async function (event, context) {
         };
     } catch (error) {
         console.error("Error in get-djs function:", error);
-        if (error.type === 'request-timeout') {
-            return { statusCode: 504, body: JSON.stringify({ error: "Gateway timeout: The Spinitron API took too long to respond." }) };
-        }
         return { statusCode: 500, body: JSON.stringify({ error: "An internal error occurred." }) };
     }
 };
