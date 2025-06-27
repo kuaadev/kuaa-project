@@ -66,8 +66,7 @@
                                             class="bi bi-volume-up-fill"></i></button>
                                     <button id="play-pause-btn" class="play-btn mx-3"><i id="play-pause-icon"
                                             class="bi bi-play-fill"></i></button>
-                                    <button id="player-dj-link" class="mx-3" title="View DJ Info"><i
-                                            class="bi bi-person-circle"></i></button>
+                                    <button class="mx-3"><i class="bi bi-heart"></i></button>
                                 </div>
                             </div>
                         </div>
@@ -235,8 +234,8 @@
                         const latestSpin = data.items[0];
 
                         const showName = latestSpin.show ? latestSpin.show.title : 'Community Programming';
-                        const djName = (latestSpin.personas && latestSpin.personas.length > 0)
-                            ? latestSpin.personas.map(p => p.name).join(' & ')
+                        const djName = (latestSpin.show && latestSpin.show.personas && latestSpin.show.personas.length > 0)
+                            ? latestSpin.show.personas.map(p => p.name).join(' & ')
                             : 'KUAA';
 
                         playerShow.textContent = `${showName} with ${djName}`;
@@ -323,13 +322,15 @@
                     const showsByDay = { 0: [], 1: [], 2: [], 3: [], 4: [], 5: [], 6: [] };
                     shows.forEach(show => {
                         const showDate = new Date(show.start);
-                        // CORRECTED: Use getDay() to get the day based on the browser's local timezone.
                         const dayOfWeek = showDate.getDay();
                         showsByDay[dayOfWeek].push(show);
                     });
 
                     for (const day in showsByDay) {
-                        showsByDay[day].sort((a, b) => new Date(a.start) - new Date(b.start));
+                        // Correctly sort shows within each day by their start time
+                        showsByDay[day].sort((a, b) => {
+                            return new Date(a.start).getHours() - new Date(b.getHours());
+                        });
                     }
 
                     renderSchedule(showsByDay);
