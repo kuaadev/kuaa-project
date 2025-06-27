@@ -6,7 +6,6 @@ exports.handler = async function (event, context) {
         return { statusCode: 500, body: JSON.stringify({ error: "Spinitron API key is not configured." }) };
     }
 
-    // Fetch the full schedule to get shows and their associated DJs
     const showsUrl = `https://spinitron.com/api/shows?access-token=${spinitronApiKey}&station=kuaa&count=200&with=personas`;
 
     try {
@@ -16,29 +15,22 @@ exports.handler = async function (event, context) {
         }
         const data = await response.json();
 
-        // Use a Map to store unique DJs, keyed by their ID, to prevent duplicates.
-        const uniqueDjs = new Map();
-
-        // Process the shows to build a unique list of DJs
-        if (data.items && Array.isArray(data.items)) {
-            data.items.forEach(show => {
-                if (show.personas && Array.isArray(show.personas)) {
-                    show.personas.forEach(dj => {
-                        // Ensure the DJ object is valid and has an ID before adding.
-                        if (dj && dj.id && !uniqueDjs.has(dj.id)) {
-                            uniqueDjs.set(dj.id, dj);
-                        }
-                    });
-                }
-            });
+        let djs = [];
+        // Per JSON:API spec, related resources are in the 'included' array.
+        if (data.included && Array.isArray(data.included)) {
+            // Filter to only include items of type 'personas'
+            djs = data.included.filter(item => item.type === 'personas');
         }
 
-        // Convert the Map of unique DJs back into an array.
-        const djsArray = Array.from(uniqueDjs.values());
-
         // The front-end expects an object with an 'items' property.
+        // We also map the attributes to the top level for easier use in the djs.html page.
         const responseData = {
-            items: djsArray
+            items: djs.map(dj => ({
+                id: dj.id,
+                name: dj.attributes.name,
+                bio: dj.attributes.bio,
+                image: dj.attributes.image
+            }))
         };
 
         return {
