@@ -10,20 +10,21 @@ exports.handler = async function (event, context) {
     const showsUrl = `https://spinitron.com/api/shows?access-token=${spinitronApiKey}&station=kuaa&count=200&with=personas`;
 
     try {
-        const response = await fetch(showsUrl, { timeout: 8000 });
+        const response = await fetch(showsUrl, { timeout: 9000 });
         if (!response.ok) {
             return { statusCode: response.status, body: JSON.stringify({ error: `Spinitron API error: ${response.statusText}` }) };
         }
         const data = await response.json();
 
+        // Use a Map to store unique DJs, keyed by their ID, to prevent duplicates.
         const uniqueDjs = new Map();
 
         // Process the shows to build a unique list of DJs
-        if (data.items && data.items.length > 0) {
+        if (data.items && Array.isArray(data.items)) {
             data.items.forEach(show => {
-                if (show.personas && show.personas.length > 0) {
+                if (show.personas && Array.isArray(show.personas)) {
                     show.personas.forEach(dj => {
-                        // Use a Map to prevent duplicate DJs
+                        // Ensure the DJ object is valid and has an ID before adding.
                         if (dj && dj.id && !uniqueDjs.has(dj.id)) {
                             uniqueDjs.set(dj.id, dj);
                         }
@@ -32,10 +33,10 @@ exports.handler = async function (event, context) {
             });
         }
 
-        // Convert the unique DJs from the Map back into an array
+        // Convert the Map of unique DJs back into an array.
         const djsArray = Array.from(uniqueDjs.values());
 
-        // Return the data in the format the front-end expects
+        // The front-end expects an object with an 'items' property.
         const responseData = {
             items: djsArray
         };
