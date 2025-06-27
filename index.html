@@ -199,7 +199,6 @@
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-        // All code is now safely inside the DOMContentLoaded listener.
         document.addEventListener('DOMContentLoaded', () => {
             const colorThief = new ColorThief();
 
@@ -325,7 +324,6 @@
                 return new Intl.DateTimeFormat('en-US', {
                     hour: 'numeric',
                     minute: '2-digit',
-                    timeZoneName: 'short',
                     timeZone: visitorTimeZone
                 }).format(date);
             };
@@ -387,48 +385,50 @@
             // --- GLOBE ---
             const globeContainer = document.getElementById('globe-container');
             const listenerCountEl = document.getElementById('listener-count');
-            const scene = new THREE.Scene();
-            const camera = new THREE.PerspectiveCamera(75, globeContainer.clientWidth / globeContainer.clientHeight, 0.1, 1000);
-            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-            renderer.setSize(globeContainer.clientWidth, globeContainer.clientHeight);
-            globeContainer.appendChild(renderer.domElement);
+            if (globeContainer) {
+                const scene = new THREE.Scene();
+                const camera = new THREE.PerspectiveCamera(75, globeContainer.clientWidth / globeContainer.clientHeight, 0.1, 1000);
+                const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+                renderer.setSize(globeContainer.clientWidth, globeContainer.clientHeight);
+                globeContainer.appendChild(renderer.domElement);
 
-            const geometry = new THREE.SphereGeometry(2, 64, 64);
-            const material = new THREE.MeshPhongMaterial({
-                color: 0x457B9D,
-                shininess: 5,
-            });
-            const earth = new THREE.Mesh(geometry, material);
-            scene.add(earth);
+                const geometry = new THREE.SphereGeometry(2, 64, 64);
+                const material = new THREE.MeshPhongMaterial({
+                    color: 0x457B9D,
+                    shininess: 5,
+                });
+                const earth = new THREE.Mesh(geometry, material);
+                scene.add(earth);
 
-            camera.position.z = 4;
-            const controls = new OrbitControls(camera, renderer.domElement);
-            controls.enableDamping = true;
-            controls.enablePan = false;
-            controls.minDistance = 3;
-            controls.maxDistance = 6;
+                camera.position.z = 4;
+                const controls = new OrbitControls(camera, renderer.domElement);
+                controls.enableDamping = true;
+                controls.enablePan = false;
+                controls.minDistance = 3;
+                controls.maxDistance = 6;
 
-            const light = new THREE.DirectionalLight(0xffffff, 2);
-            light.position.set(5, 3, 5);
-            scene.add(light);
-            scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+                const light = new THREE.DirectionalLight(0xffffff, 2);
+                light.position.set(5, 3, 5);
+                scene.add(light);
+                scene.add(new THREE.AmbientLight(0xffffff, 0.5));
 
-            function animate() {
-                requestAnimationFrame(animate);
-                controls.update();
-                earth.rotation.y += 0.0005;
-                renderer.render(scene, camera);
+                function animate() {
+                    requestAnimationFrame(animate);
+                    controls.update();
+                    earth.rotation.y += 0.0005;
+                    renderer.render(scene, camera);
+                }
+                animate();
             }
-            animate();
 
             const fetchListeners = async () => {
                 try {
                     const response = await fetch('/.netlify/functions/get-listeners');
                     const data = await response.json();
-                    listenerCountEl.textContent = data.count || 0;
+                    if (listenerCountEl) listenerCountEl.textContent = data.count || 0;
                 } catch (e) {
                     console.error("Error fetching listeners:", e);
-                    listenerCountEl.textContent = 'N/A';
+                    if (listenerCountEl) listenerCountEl.textContent = 'N/A';
                 }
             };
 
