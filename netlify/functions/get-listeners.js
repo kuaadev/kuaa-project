@@ -10,17 +10,14 @@ exports.handler = async function (event, context) {
         }
         const data = await response.json();
 
-        // Add robust checking for the data structure
         if (!data || !data.icestats || !data.icestats.source) {
-            return { statusCode: 500, body: JSON.stringify({ error: "Unexpected stats format from stream server." }) };
+            return { statusCode: 200, body: JSON.stringify({ count: 0 }) };
         }
 
-        // Ensure source is an array before using .find()
         const sourceArray = Array.isArray(data.icestats.source) ? data.icestats.source : [data.icestats.source];
         const mountpoint = sourceArray.find(s => s && s.listenurl && s.listenurl.includes('kuaa'));
 
         if (!mountpoint) {
-            // If the kuaa mountpoint isn't found, return a count of 0.
             return { statusCode: 200, body: JSON.stringify({ count: 0 }) };
         }
 
