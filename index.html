@@ -327,9 +327,8 @@
                     });
 
                     for (const day in showsByDay) {
-                        // Correctly sort shows within each day by their start time
                         showsByDay[day].sort((a, b) => {
-                            return new Date(a.start).getHours() - new Date(b.getHours());
+                            return new Date(a.start).getTime() - new Date(b.start).getTime();
                         });
                     }
 
