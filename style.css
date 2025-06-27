@@ -60,7 +60,7 @@ body {
 }
 
 .hero {
-    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url('https://placehold.co/1920x1080/1D3557/F1FAEE?text=KUAA+Broadcast') no-repeat center center;
+    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.8)), url('https://placehold.co/1920x1080/1D3557/1D3557') no-repeat center center;
     background-size: cover;
     color: var(--kuaa-secondary);
     padding: 8rem 0;
@@ -104,8 +104,9 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 50%;
-    max-width: 200px;
+    width: 60%;
+    max-width: 250px;
+    /* Increased from 200px */
     aspect-ratio: 1 / 1;
     border-radius: 0.75rem;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
@@ -175,14 +176,4 @@ body {
 .schedule .table {
     border-radius: 0.5rem;
     overflow: hidden;
-}
-
-#globe-container {
-    height: 500px;
-    cursor: grab;
-}
-
-#listener-list {
-    max-height: 500px;
-    overflow-y: auto;
 }
