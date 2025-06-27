@@ -19,7 +19,7 @@
     <main class="container" style="padding-top: 8rem;">
         <section id="djs" class="py-5">
             <h1 class="section-title text-center">Our DJs</h1>
-            <div id="djs-container" class="row g-4">
+            <div id="djs-container" class="row g-4 justify-content-center">
                 <div class="col-12 text-center p-5">
                     <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
                         <span class="visually-hidden">Loading...</span>
@@ -77,10 +77,14 @@
                     const data = await response.json();
 
                     if (data.items && data.items.length > 0) {
-                        // Filter out DJs with no name and sort alphabetically
                         const sortedDjs = data.items
-                            .filter(dj => dj.name)
+                            .filter(dj => dj.name) // Make sure DJ has a name
                             .sort((a, b) => a.name.localeCompare(b.name));
+
+                        if (sortedDjs.length === 0) {
+                            djsContainer.innerHTML = '<p class="text-center p-3">Could not find any active DJs.</p>';
+                            return;
+                        }
 
                         let djsHtml = '';
                         sortedDjs.forEach(dj => {

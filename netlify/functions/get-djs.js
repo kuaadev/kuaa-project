@@ -6,7 +6,6 @@ exports.handler = async function (event, context) {
         return { statusCode: 500, body: JSON.stringify({ error: "Spinitron API key is not configured." }) };
     }
 
-    // Fetch the full schedule to get shows and their associated DJs
     const showsUrl = `https://spinitron.com/api/shows?access-token=${spinitronApiKey}&station=kuaa&count=200&with=personas`;
 
     try {
@@ -16,38 +15,26 @@ exports.handler = async function (event, context) {
         }
         const data = await response.json();
 
-        // Use a Map to store unique DJs, keyed by their ID, to prevent duplicates.
-        const uniqueDjs = new Map();
-
-        // Process the shows to build a unique list of DJs
-        if (data.items && Array.isArray(data.items)) {
-            data.items.forEach(show => {
-                // The related DJ info is in the `included` array. We need to find them.
-                if (show.relationships.personas && show.relationships.personas.data.length > 0) {
-                    show.relationships.personas.data.forEach(personaRef => {
-                        if (!uniqueDjs.has(personaRef.id)) {
-                            // Find the full persona object in the 'included' array
-                            const persona = data.included.find(inc => inc.type === 'personas' && inc.id === personaRef.id);
-                            if (persona) {
-                                uniqueDjs.set(persona.id, persona);
-                            }
-                        }
-                    });
-                }
-            });
+        let djs = [];
+        if (data.included && Array.isArray(data.included)) {
+            // The 'included' array contains all related data, including personas.
+            // We can just filter it to get all unique DJs associated with the fetched shows.
+            djs = data.included.filter(item => item.type === 'personas');
         }
 
-        // Convert the Map of unique DJs back into an array of objects the frontend can use.
-        const djsArray = Array.from(uniqueDjs.values()).map(dj => ({
+        // Map the data to the format the frontend expects (name, bio, image at the top level).
+        const djsArray = djs.map(dj => ({
             id: dj.id,
             name: dj.attributes.name,
             bio: dj.attributes.bio,
             image: dj.attributes.image
         }));
 
-        // Return the data in the format the front-end expects
+        // Remove potential duplicates, just in case
+        const uniqueDjs = Array.from(new Map(djsArray.map(dj => [dj.id, dj])).values());
+
         const responseData = {
-            items: djsArray
+            items: uniqueDjs
         };
 
         return {
