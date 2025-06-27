@@ -6,21 +6,46 @@ exports.handler = async function (event, context) {
         return { statusCode: 500, body: JSON.stringify({ error: "Spinitron API key is not configured." }) };
     }
 
-    const spinitronApiUrl = `https://spinitron.com/api/personas?access-token=${spinitronApiKey}&station=kuaa&count=100`;
+    // Fetch the full schedule to get shows and their associated DJs
+    const showsUrl = `https://spinitron.com/api/shows?access-token=${spinitronApiKey}&station=kuaa&count=200&with=personas`;
 
     try {
-        const response = await fetch(spinitronApiUrl, { timeout: 8000 }); // Added a timeout
+        const response = await fetch(showsUrl, { timeout: 8000 });
         if (!response.ok) {
             return { statusCode: response.status, body: JSON.stringify({ error: `Spinitron API error: ${response.statusText}` }) };
         }
         const data = await response.json();
+
+        const uniqueDjs = new Map();
+
+        // Process the shows to build a unique list of DJs
+        if (data.items && data.items.length > 0) {
+            data.items.forEach(show => {
+                if (show.personas && show.personas.length > 0) {
+                    show.personas.forEach(dj => {
+                        // Use a Map to prevent duplicate DJs
+                        if (!uniqueDjs.has(dj.id)) {
+                            uniqueDjs.set(dj.id, dj);
+                        }
+                    });
+                }
+            });
+        }
+
+        // Convert the unique DJs from the Map back into an array
+        const djsArray = Array.from(uniqueDjs.values());
+
+        // Return the data in the format the front-end expects
+        const responseData = {
+            items: djsArray
+        };
+
         return {
             statusCode: 200,
-            body: JSON.stringify(data)
+            body: JSON.stringify(responseData)
         };
     } catch (error) {
         console.error("Error in get-djs function:", error);
-        // If it's a timeout error, send a specific message
         if (error.type === 'request-timeout') {
             return { statusCode: 504, body: JSON.stringify({ error: "Gateway timeout: The Spinitron API took too long to respond." }) };
         }
