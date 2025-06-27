@@ -69,6 +69,7 @@
         function initializeDjsPage() {
             const djsContainer = document.getElementById('djs-container');
             const djsApiUrl = `/.netlify/functions/get-djs`;
+            const scheduleApiUrl = `/.netlify/functions/get-schedule`;
 
             const formatShowTime = (dateStr) => {
                 const date = new Date(dateStr);
@@ -78,54 +79,103 @@
                 return `${day} at ${time}`;
             };
 
-            const fetchDjs = async () => {
+            const fetchAndProcessDjs = async () => {
                 try {
-                    const response = await fetch(djsApiUrl);
-                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                    const data = await response.json();
+                    // Fetch both DJs and Schedule at the same time
+                    const [djsResponse, scheduleResponse] = await Promise.all([
+                        fetch(djsApiUrl),
+                        fetch(scheduleApiUrl)
+                    ]);
 
-                    if (data.items && data.items.length > 0) {
-                        const sortedDjs = data.items.sort((a, b) => {
-                            if (a.onAir) return -1; // a comes first
-                            if (b.onAir) return 1;  // b comes first
-                            if (!a.nextShowTime) return 1; // a goes to end
-                            if (!b.nextShowTime) return -1; // b goes to end
-                            return new Date(a.nextShowTime) - new Date(b.nextShowTime);
-                        });
-
-                        let djsHtml = '';
-                        sortedDjs.forEach(dj => {
-                            let statusHtml = '';
-                            if (dj.onAir) {
-                                statusHtml = `<div class="card-footer bg-danger text-white fw-bold">ON AIR NOW</div>`;
-                            } else if (dj.nextShowTime) {
-                                statusHtml = `<div class="card-footer">Next up: ${formatShowTime(dj.nextShowTime)}</div>`;
-                            }
-
-                            djsHtml += `
-                                <div class="col-md-6 col-lg-4 col-xl-3">
-                                    <div class="card h-100 text-center">
-                                        <img src="${dj.image || 'https://placehold.co/400x400/A8DADC/1D3557?text=?'}" class="card-img-top" alt="${dj.name}">
-                                        <div class="card-body d-flex flex-column">
-                                            <h5 class="card-title fw-bold">${dj.name}</h5>
-                                            <p class="card-text small text-muted flex-grow-1">${dj.bio ? dj.bio.substring(0, 100) + '...' : ''}</p>
-                                        </div>
-                                        ${statusHtml}
-                                    </div>
-                                </div>
-                            `;
-                        });
-                        djsContainer.innerHTML = djsHtml;
-                    } else {
-                        djsContainer.innerHTML = '<p class="text-center p-3">Could not find any DJs.</p>';
+                    if (!djsResponse.ok || !scheduleResponse.ok) {
+                        throw new Error('Failed to fetch necessary data.');
                     }
+
+                    const djsData = await djsResponse.json();
+                    const scheduleData = await scheduleResponse.json();
+
+                    const allDjs = djsData.items || [];
+                    const shows = scheduleData.data || [];
+                    const now = new Date();
+
+                    // Step 1: Get a Set of all Persona IDs that have a show on the schedule
+                    const activePersonaIds = new Set();
+                    shows.forEach(show => {
+                        if (show.relationships.personas && show.relationships.personas.data) {
+                            show.relationships.personas.data.forEach(pRef => activePersonaIds.add(pRef.id));
+                        }
+                    });
+
+                    // Step 2: Filter the main DJ list to only include active DJs
+                    let activeDjs = allDjs.filter(dj => activePersonaIds.has(dj.id));
+
+                    // Step 3: Add status and next show time to each active DJ
+                    activeDjs.forEach(dj => {
+                        dj.nextShowTime = null;
+                        dj.onAir = false;
+                        shows.forEach(show => {
+                            const personaIdsInShow = (show.relationships.personas.data || []).map(p => p.id);
+                            if (personaIdsInShow.includes(dj.id)) {
+                                const startTime = new Date(show.attributes.start);
+                                const endTime = new Date(show.attributes.end);
+                                if (now >= startTime && now < endTime) {
+                                    dj.onAir = true;
+                                    dj.nextShowTime = startTime;
+                                } else if (startTime > now && (!dj.nextShowTime || startTime < dj.nextShowTime)) {
+                                    dj.nextShowTime = startTime;
+                                }
+                            }
+                        });
+                    });
+
+                    // Step 4: Sort the final list
+                    activeDjs.sort((a, b) => {
+                        if (a.onAir) return -1;
+                        if (b.onAir) return 1;
+                        if (!a.nextShowTime) return 1;
+                        if (!b.nextShowTime) return -1;
+                        return new Date(a.nextShowTime) - new Date(b.nextShowTime);
+                    });
+
+                    renderDjs(activeDjs);
+
                 } catch (error) {
-                    console.error("Error fetching DJs:", error);
+                    console.error("Error fetching and processing DJs:", error);
                     djsContainer.innerHTML = '<p class="text-center p-3 text-danger">Could not load DJ information.</p>';
                 }
             };
 
-            fetchDjs();
+            const renderDjs = (djs) => {
+                if (djs && djs.length > 0) {
+                    let djsHtml = '';
+                    djs.forEach(dj => {
+                        let statusHtml = '';
+                        if (dj.onAir) {
+                            statusHtml = `<div class="card-footer bg-danger text-white fw-bold">ON AIR NOW</div>`;
+                        } else if (dj.nextShowTime) {
+                            statusHtml = `<div class="card-footer">Next up: ${formatShowTime(dj.nextShowTime)}</div>`;
+                        }
+
+                        djsHtml += `
+                            <div class="col-md-6 col-lg-4 col-xl-3">
+                                <div class="card h-100 text-center">
+                                    <img src="${dj.image || 'https://placehold.co/400x400/A8DADC/1D3557?text=?'}" class="card-img-top" alt="${dj.name}">
+                                    <div class="card-body d-flex flex-column">
+                                        <h5 class="card-title fw-bold">${dj.name}</h5>
+                                        <p class="card-text small text-muted flex-grow-1">${dj.bio ? dj.bio.substring(0, 100) + '...' : ''}</p>
+                                    </div>
+                                    ${statusHtml}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    djsContainer.innerHTML = djsHtml;
+                } else {
+                    djsContainer.innerHTML = '<p class="text-center p-3">Could not find any active DJs.</p>';
+                }
+            };
+
+            fetchAndProcessDjs();
         }
 
         initializePage();
