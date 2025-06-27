@@ -22,13 +22,13 @@
     <header>
         <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
             <div class="container">
-                <a class="navbar-brand" href="#">KUAA 99.9FM</a>
+                <a class="navbar-brand" href="index.html">KUAA 99.9FM</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span
                         class="navbar-toggler-icon"></span></button>
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav ms-auto align-items-center">
-                        <li class="nav-item"><a class="nav-link" href="#home">Home</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#listeners">Listeners</a></li>
+                        <li class="nav-item"><a class="nav-link active" href="index.html">Home</a></li>
+                        <li class="nav-item"><a class="nav-link" href="listeners.html">Listeners</a></li>
                         <li class="nav-item"><a class="nav-link" href="#schedule">Schedule</a></li>
                         <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
                         <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
@@ -72,25 +72,6 @@
                             </div>
                         </div>
 
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="listeners" class="py-5">
-            <div class="container">
-                <h2 class="section-title text-center">Live Listeners</h2>
-                <div class="row g-4 align-items-center">
-                    <div class="col-lg-8">
-                        <div id="globe-container" class="bg-dark rounded shadow"></div>
-                    </div>
-                    <div class="col-lg-4">
-                        <h3 class="fw-bold">Streaming Worldwide</h3>
-                        <p>Now reaching <strong id="listener-count">0</strong> listeners across the globe. Join our
-                            community!</p>
-                        <div id="listener-list" class="list-group">
-                            <!-- Listener list will be populated here by JS -->
-                        </div>
                     </div>
                 </div>
             </div>
@@ -193,12 +174,7 @@
     </footer>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
-    <script
-        type="importmap">{ "imports": { "three": "https://unpkg.com/three@0.165.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.165.0/examples/jsm/" } }</script>
-    <script type="module">
-        import * as THREE from 'three';
-        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-
+    <script>
         document.addEventListener('DOMContentLoaded', () => {
             const colorThief = new ColorThief();
 
@@ -254,14 +230,12 @@
                     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                     const data = await response.json();
 
-                    if (data.show) {
-                        const showName = data.show.title || 'Community Programming';
-                        const djName = (data.show.personas && data.show.personas.length > 0)
-                            ? data.show.personas.map(p => p.name).join(' & ')
-                            : 'KUAA';
-                        playerShow.textContent = `${showName} with ${djName}`;
-                    }
+                    const showName = data.show ? data.show.title : 'Community Programming';
+                    const djName = (data.show && data.show.personas && data.show.personas.length > 0)
+                        ? data.show.personas.map(p => p.name).join(' & ')
+                        : 'KUAA';
 
+                    playerShow.textContent = `${showName} with ${djName}`;
                     playerSong.textContent = data.song || 'Music Variety';
                     playerArtist.textContent = data.artist || 'Various Artists';
 
@@ -382,64 +356,12 @@
                 }
             };
 
-            // --- GLOBE ---
-            const globeContainer = document.getElementById('globe-container');
-            const listenerCountEl = document.getElementById('listener-count');
-            if (globeContainer) {
-                const scene = new THREE.Scene();
-                const camera = new THREE.PerspectiveCamera(75, globeContainer.clientWidth / globeContainer.clientHeight, 0.1, 1000);
-                const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-                renderer.setSize(globeContainer.clientWidth, globeContainer.clientHeight);
-                globeContainer.appendChild(renderer.domElement);
-
-                const geometry = new THREE.SphereGeometry(2, 64, 64);
-                const material = new THREE.MeshPhongMaterial({
-                    color: 0x457B9D,
-                    shininess: 5,
-                });
-                const earth = new THREE.Mesh(geometry, material);
-                scene.add(earth);
-
-                camera.position.z = 4;
-                const controls = new OrbitControls(camera, renderer.domElement);
-                controls.enableDamping = true;
-                controls.enablePan = false;
-                controls.minDistance = 3;
-                controls.maxDistance = 6;
-
-                const light = new THREE.DirectionalLight(0xffffff, 2);
-                light.position.set(5, 3, 5);
-                scene.add(light);
-                scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-
-                function animate() {
-                    requestAnimationFrame(animate);
-                    controls.update();
-                    earth.rotation.y += 0.0005;
-                    renderer.render(scene, camera);
-                }
-                animate();
-            }
-
-            const fetchListeners = async () => {
-                try {
-                    const response = await fetch('/.netlify/functions/get-listeners');
-                    const data = await response.json();
-                    if (listenerCountEl) listenerCountEl.textContent = data.count || 0;
-                } catch (e) {
-                    console.error("Error fetching listeners:", e);
-                    if (listenerCountEl) listenerCountEl.textContent = 'N/A';
-                }
-            };
-
             // --- INITIALIZE ---
             fetchNowPlaying();
             fetchRecentSpins();
             fetchSchedule();
-            fetchListeners();
             setInterval(fetchNowPlaying, 20000);
             setInterval(fetchRecentSpins, 60000);
-            setInterval(fetchListeners, 30000);
 
             // Set Today's Tab as Active
             const todayIndex = new Date().getDay();

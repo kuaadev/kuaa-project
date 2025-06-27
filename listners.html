@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Listeners - KUAA 99.9 FM</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="bg-dark">
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+            <div class="container">
+                <a class="navbar-brand" href="index.html">KUAA 99.9FM</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span
+                        class="navbar-toggler-icon"></span></button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto align-items-center">
+                        <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                        <li class="nav-item"><a class="nav-link active" href="listeners.html">Listeners</a></li>
+                        <li class="nav-item"><a class="nav-link" href="index.html#schedule">Schedule</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <main class="container" style="padding-top: 8rem;">
+        <section id="listeners" class="py-5">
+            <h2 class="section-title text-center text-light">Live Listeners</h2>
+            <div class="row g-4 align-items-center">
+                <div class="col-lg-8">
+                    <div id="globe-container" class="rounded shadow" style="height: 60vh;"></div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="card bg-dark border-secondary text-light">
+                        <div class="card-body">
+                            <h3 class="fw-bold">Streaming Worldwide</h3>
+                            <p>Now reaching <strong id="listener-count">0</strong> listeners across the globe. Join our
+                                community!</p>
+                            <div id="listener-list" class="list-group">
+                                <!-- Listener list would be populated here if geolocation was fully implemented -->
+                                <p class="text-muted small">Listener list feature is currently in development.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="footer py-4">
+        <div class="container text-center">
+            <p>&copy; 2025 KUAA 99.9 FM. A project of the <a href="https://utaharts.org/" target="_blank">Utah Arts
+                    Alliance</a>.</p>
+        </div>
+    </footer>
+    <script
+        type="importmap">{ "imports": { "three": "https://unpkg.com/three@0.165.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.165.0/examples/jsm/" } }</script>
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // --- GLOBE ---
+        const globeContainer = document.getElementById('globe-container');
+        const listenerCountEl = document.getElementById('listener-count');
+        if (globeContainer) {
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, globeContainer.clientWidth / globeContainer.clientHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(globeContainer.clientWidth, globeContainer.clientHeight);
+            globeContainer.appendChild(renderer.domElement);
+
+            const geometry = new THREE.SphereGeometry(2, 64, 64);
+            const material = new THREE.MeshPhongMaterial({
+                color: 0x457B9D,
+                shininess: 5,
+            });
+            const earth = new THREE.Mesh(geometry, material);
+            scene.add(earth);
+
+            camera.position.z = 4;
+            const controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.enablePan = false;
+            controls.minDistance = 3;
+            controls.maxDistance = 6;
+
+            const light = new THREE.DirectionalLight(0xffffff, 2);
+            light.position.set(5, 3, 5);
+            scene.add(light);
+            scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+
+            function animate() {
+                requestAnimationFrame(animate);
+                controls.update();
+                earth.rotation.y += 0.0005;
+                renderer.render(scene, camera);
+            }
+            animate();
+        }
+
+        const fetchListeners = async () => {
+            try {
+                const response = await fetch('/.netlify/functions/get-listeners');
+                const data = await response.json();
+                if (listenerCountEl) listenerCountEl.textContent = data.count || 0;
+            } catch (e) {
+                console.error("Error fetching listeners:", e);
+                if (listenerCountEl) listenerCountEl.textContent = 'N/A';
+            }
+        };
+
+        fetchListeners();
+        setInterval(fetchListeners, 30000);
+    </script>
+</body>
+
+</html>
