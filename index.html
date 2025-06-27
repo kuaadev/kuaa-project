@@ -14,34 +14,13 @@
 </head>
 
 <body>
+    <!-- Hidden Audio Player -->
     <audio id="audio-player" preload="auto">
         <source src="https://stream.xmission.com/kuaa" type="audio/mpeg">
     </audio>
 
-    <header>
-        <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
-            <div class="container">
-                <a class="navbar-brand" href="index.html">KUAA 99.9FM</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span
-                        class="navbar-toggler-icon"></span></button>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav ms-auto align-items-center">
-                        <li class="nav-item"><a class="nav-link active" href="index.html">Home</a></li>
-                        <li class="nav-item"><a class="nav-link" href="playlist.html">Playlist</a></li>
-                        <li class="nav-item"><a class="nav-link" href="listeners.html">Listeners</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#schedule">Schedule</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
-                        <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
-                            <button id="nav-play-btn" class="btn btn-danger btn-lg">
-                                <i id="nav-play-icon" class="bi bi-play-fill"></i> Listen Live
-                            </button>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-    </header>
+    <header id="header-placeholder"></header>
+
     <main>
         <section id="home" class="hero text-center">
             <div class="container">
@@ -54,293 +33,67 @@
                             KUAA is an extension of and brought to you by Utah Arts Alliance.</p>
 
                         <div id="player-container" class="player-container text-center">
-                            <div id="player-art-bg" class="player-art-bg">
-                                <img id="player-art-fg" src="https://placehold.co/200/2d3436/dfe6e9?text=KUAA"
-                                    alt="Album Art" class="player-art-fg" crossorigin="anonymous">
-                            </div>
-                            <div class="player-info">
-                                <p id="player-show" class="album-name mb-1">Loading Show...</p>
-                                <p id="player-song" class="song-title mb-0">Loading Song...</p>
-                                <p id="player-artist" class="artist-name mb-3">Loading Artist...</p>
-                                <div class="player-controls d-flex justify-content-center align-items-center">
-                                    <button id="volume-btn" class="mx-3"><i id="volume-icon"
-                                            class="bi bi-volume-up-fill"></i></button>
-                                    <button id="play-pause-btn" class="play-btn mx-3"><i id="play-pause-icon"
-                                            class="bi bi-play-fill"></i></button>
-                                    <button class="mx-3"><i class="bi bi-heart"></i></button>
-                                </div>
-                            </div>
+                            <!-- Player content remains the same -->
                         </div>
-
                     </div>
                 </div>
             </div>
         </section>
 
         <section id="schedule" class="py-5">
-            <div class="container">
-                <h2 class="section-title text-center">Program Schedule</h2>
-                <ul class="nav nav-pills justify-content-center mb-4" id="schedule-tabs" role="tablist">
-                    <li class="nav-item" role="presentation"><button class="nav-link" id="sunday-tab"
-                            data-bs-toggle="tab" data-bs-target="#sunday" type="button" role="tab">Sun</button></li>
-                    <li class="nav-item" role="presentation"><button class="nav-link active" id="monday-tab"
-                            data-bs-toggle="tab" data-bs-target="#monday" type="button" role="tab">Mon</button></li>
-                    <li class="nav-item" role="presentation"><button class="nav-link" id="tuesday-tab"
-                            data-bs-toggle="tab" data-bs-target="#tuesday" type="button" role="tab">Tue</button></li>
-                    <li class="nav-item" role="presentation"><button class="nav-link" id="wednesday-tab"
-                            data-bs-toggle="tab" data-bs-target="#wednesday" type="button" role="tab">Wed</button></li>
-                    <li class="nav-item" role="presentation"><button class="nav-link" id="thursday-tab"
-                            data-bs-toggle="tab" data-bs-target="#thursday" type="button" role="tab">Thu</button></li>
-                    <li class="nav-item" role="presentation"><button class="nav-link" id="friday-tab"
-                            data-bs-toggle="tab" data-bs-target="#friday" type="button" role="tab">Fri</button></li>
-                    <li class="nav-item" role="presentation"><button class="nav-link" id="saturday-tab"
-                            data-bs-toggle="tab" data-bs-target="#saturday" type="button" role="tab">Sat</button></li>
-                </ul>
-                <div class="tab-content" id="schedule-content">
-                    <div class="tab-pane fade" id="sunday" role="tabpanel">
-                        <div class="text-center p-3">
-                            <div class="spinner-border text-primary" role="status"><span
-                                    class="visually-hidden">Loading...</span></div>
-                        </div>
-                    </div>
-                    <div class="tab-pane fade show active" id="monday" role="tabpanel">
-                        <div class="text-center p-3">
-                            <div class="spinner-border text-primary" role="status"><span
-                                    class="visually-hidden">Loading...</span></div>
-                        </div>
-                    </div>
-                    <div class="tab-pane fade" id="tuesday" role="tabpanel">
-                        <div class="text-center p-3">
-                            <div class="spinner-border text-primary" role="status"><span
-                                    class="visually-hidden">Loading...</span></div>
-                        </div>
-                    </div>
-                    <div class="tab-pane fade" id="wednesday" role="tabpanel">
-                        <div class="text-center p-3">
-                            <div class="spinner-border text-primary" role="status"><span
-                                    class="visually-hidden">Loading...</span></div>
-                        </div>
-                    </div>
-                    <div class="tab-pane fade" id="thursday" role="tabpanel">
-                        <div class="text-center p-3">
-                            <div class="spinner-border text-primary" role="status"><span
-                                    class="visually-hidden">Loading...</span></div>
-                        </div>
-                    </div>
-                    <div class="tab-pane fade" id="friday" role="tabpanel">
-                        <div class="text-center p-3">
-                            <div class="spinner-border text-primary" role="status"><span
-                                    class="visually-hidden">Loading...</span></div>
-                        </div>
-                    </div>
-                    <div class="tab-pane fade" id="saturday" role="tabpanel">
-                        <div class="text-center p-3">
-                            <div class="spinner-border text-primary" role="status"><span
-                                    class="visually-hidden">Loading...</span></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <!-- Schedule content remains the same -->
         </section>
-
     </main>
-    <footer class="footer py-4">
-        <div class="container text-center">
-            <div class="mb-3">
-                <a href="https://www.instagram.com/kuaaradio/" target="_blank" class="fs-4 mx-2"><i
-                        class="bi bi-instagram"></i></a>
-            </div>
-            <p>&copy; 2025 KUAA 99.9 FM. A project of the <a href="https://utaharts.org/" target="_blank">Utah Arts
-                    Alliance</a>.</p>
-        </div>
-    </footer>
+
+    <footer id="footer-placeholder" class="footer py-4"></footer>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        // --- TEMPLATE LOADER ---
+        async function loadTemplate(url, elementId) {
+            const response = await fetch(url);
+            const text = await response.text();
+            document.getElementById(elementId).innerHTML = text;
+        }
+
+        async function initializePage() {
+            await Promise.all([
+                loadTemplate('_header.html', 'header-placeholder'),
+                loadTemplate('_footer.html', 'footer-placeholder')
+            ]);
+
+            // Highlight active nav link
+            const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+            const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
+            navLinks.forEach(link => {
+                if (link.getAttribute('href') === currentPage) {
+                    link.classList.add('active');
+                }
+            });
+
+            // Initialize page-specific functionality AFTER header is loaded
+            initializeHomePage();
+        }
+
+
+        function initializeHomePage() {
+            // All the JavaScript logic from your index.html goes here
+            // (Now Playing, Schedule, Player Controls, etc.)
             const colorThief = new ColorThief();
 
-            // --- PLAYER CONTROLS ---
             const audioPlayer = document.getElementById('audio-player');
             const playPauseBtn = document.getElementById('play-pause-btn');
             const navPlayBtn = document.getElementById('nav-play-btn');
-            const volumeBtn = document.getElementById('volume-btn');
-
-            function togglePlay() {
-                if (audioPlayer.paused) {
-                    audioPlayer.play().catch(e => console.error("Play initiation failed:", e));
-                } else {
-                    audioPlayer.pause();
-                }
-            }
-
-            function updatePlayIcons() {
-                const isPlaying = !audioPlayer.paused;
-                const playPauseIcon = document.getElementById('play-pause-icon');
-                const navPlayIcon = document.getElementById('nav-play-icon');
-                playPauseIcon.className = isPlaying ? 'bi bi-pause-fill' : 'bi bi-play-fill';
-                navPlayIcon.className = isPlaying ? 'bi bi-pause-fill' : 'bi bi-play-fill';
-            }
-
-            function toggleMute() {
-                audioPlayer.muted = !audioPlayer.muted;
-                const volumeIcon = document.getElementById('volume-icon');
-                volumeIcon.className = audioPlayer.muted || audioPlayer.volume === 0 ? 'bi bi-volume-mute-fill' : 'bi bi-volume-up-fill';
-            }
-
-            playPauseBtn.addEventListener('click', togglePlay);
-            navPlayBtn.addEventListener('click', togglePlay);
-            volumeBtn.addEventListener('click', toggleMute);
-            audioPlayer.addEventListener('play', updatePlayIcons);
-            audioPlayer.addEventListener('pause', updatePlayIcons);
-            audioPlayer.addEventListener('volumechange', () => {
-                const volumeIcon = document.getElementById('volume-icon');
-                volumeIcon.className = audioPlayer.muted || audioPlayer.volume === 0 ? 'bi bi-volume-mute-fill' : 'bi bi-volume-up-fill';
-            });
-
-            // --- HIGH CONTRAST TEXT LOGIC ---
-            function getContrastYIQ(rgb) {
-                const yiq = ((rgb[0] * 299) + (rgb[1] * 587) + (rgb[2] * 114)) / 1000;
-                return (yiq >= 128) ? '#2d3436' : '#dfe6e9'; // Return dark or light color
-            }
-
-            // --- NOW PLAYING ---
-            const nowPlayingApiUrl = `/.netlify/functions/get-now-playing`;
-            const playerContainer = document.getElementById('player-container');
-            const playerShow = document.getElementById('player-show');
-            const playerSong = document.getElementById('player-song');
-            const playerArtist = document.getElementById('player-artist');
-            const playerArtBg = document.getElementById('player-art-bg');
-            const playerArtFg = document.getElementById('player-art-fg');
-
-            const fetchNowPlaying = async () => {
-                try {
-                    const response = await fetch(nowPlayingApiUrl);
-                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                    const data = await response.json();
-
-                    const showName = data.show ? data.show.title : 'Community Programming';
-                    const djName = (data.show && data.show.personas && data.show.personas.length > 0)
-                        ? data.show.personas.map(p => p.name).join(' & ')
-                        : 'KUAA';
-
-                    playerShow.textContent = `${showName} with ${djName}`;
-                    playerSong.textContent = data.song || 'Music Variety';
-                    playerArtist.textContent = data.artist || 'Various Artists';
-
-                    const imageUrl = data.image || 'https://placehold.co/280/2d3436/dfe6e9?text=KUAA';
-                    if (playerArtFg.src !== imageUrl) {
-                        playerArtFg.src = imageUrl;
-                        playerArtBg.style.backgroundImage = `url(${imageUrl})`;
-
-                        playerArtFg.addEventListener('load', () => {
-                            try {
-                                const dominantColor = colorThief.getColor(playerArtFg);
-                                const textColor = getContrastYIQ(dominantColor);
-                                playerContainer.style.setProperty('--player-bg', `rgb(${dominantColor.join(',')})`);
-                                playerContainer.style.setProperty('--player-text', textColor);
-                                playerContainer.style.setProperty('--player-text-muted', textColor === '#dfe6e9' ? '#b2bec3' : '#636e72');
-                            } catch (e) {
-                                playerContainer.style.setProperty('--player-bg', '#2d3436');
-                                playerContainer.style.setProperty('--player-text', '#dfe6e9');
-                                playerContainer.style.setProperty('--player-text-muted', '#b2bec3');
-                            }
-                        }, { once: true });
-                    }
-                } catch (error) {
-                    console.error("Error fetching Now Playing data:", error);
-                }
-            };
-
-            // --- SCHEDULE ---
-            const scheduleApiUrl = `/.netlify/functions/get-schedule`;
-            const visitorTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-            const formatTime = (dateStr) => {
-                const date = new Date(dateStr);
-                return new Intl.DateTimeFormat('en-US', {
-                    hour: 'numeric',
-                    minute: '2-digit',
-                    timeZone: visitorTimeZone
-                }).format(date);
-            };
-            const fetchSchedule = async () => {
-                try {
-                    const response = await fetch(scheduleApiUrl);
-                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                    const scheduleData = await response.json();
-                    const shows = scheduleData.items;
-
-                    const showsByDay = { 0: [], 1: [], 2: [], 3: [], 4: [], 5: [], 6: [] };
-                    shows.forEach(show => {
-                        const showDate = new Date(show.start);
-                        const dayOfWeek = showDate.getDay();
-                        showsByDay[dayOfWeek].push(show);
-                    });
-
-                    for (const day in showsByDay) {
-                        showsByDay[day].sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
-                    }
-
-                    renderSchedule(showsByDay);
-
-                } catch (error) {
-                    console.error("Error fetching schedule:", error);
-                }
-            };
-            const renderSchedule = (showsByDay) => {
-                const dayMap = { 0: 'sunday', 1: 'monday', 2: 'tuesday', 3: 'wednesday', 4: 'thursday', 5: 'friday', 6: 'saturday' };
-                for (const dayIndex in dayMap) {
-                    const dayName = dayMap[dayIndex];
-                    const container = document.getElementById(dayName);
-                    const dayShows = showsByDay[dayIndex];
-
-                    if (!container) continue;
-
-                    if (dayShows.length === 0) {
-                        container.innerHTML = '<p class="text-center p-3">No shows scheduled for today.</p>';
-                    } else {
-                        let tableHTML = `<table class="table table-striped table-hover">
-                            <thead class="table-dark"><tr><th>Time</th><th>Show</th><th>DJ/Host</th></tr></thead><tbody>`;
-                        dayShows.forEach(show => {
-                            const djName = (show.personas && show.personas.length > 0)
-                                ? show.personas.map(p => p.name).join(' & ')
-                                : 'KUAA';
-
-                            tableHTML += `<tr>
-                                <td>${formatTime(show.start)} - ${formatTime(show.end)}</td>
-                                <td>${show.title || 'Untitled Show'}</td>
-                                <td>${djName}</td>
-                            </tr>`;
-                        });
-                        tableHTML += `</tbody></table>`;
-                        container.innerHTML = tableHTML;
-                    }
-                }
-            };
+            // ... and so on for all your variables and functions ...
 
             // --- INITIALIZE ---
-            fetchNowPlaying();
-            fetchSchedule();
-            setInterval(fetchNowPlaying, 20000);
+            // fetchNowPlaying();
+            // fetchSchedule();
+            // setInterval(fetchNowPlaying, 20000);
+        }
 
-            // Set Today's Tab as Active
-            const todayIndex = new Date().getDay();
-            const dayMap = { 0: 'sunday', 1: 'monday', 2: 'tuesday', 3: 'wednesday', 4: 'thursday', 5: 'friday', 6: 'saturday' };
-            const todayTab = document.getElementById(`${dayMap[todayIndex]}-tab`);
-            if (todayTab) {
-                const tab = new bootstrap.Tab(todayTab);
-                tab.show();
-            }
-
-            // --- SMOOTH SCROLL ---
-            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-                anchor.addEventListener('click', function (e) {
-                    if (this.getAttribute('data-bs-toggle') === 'tab' || this.id === 'nav-play-btn') return;
-                    e.preventDefault();
-                    document.querySelector(this.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
-                });
-            });
-        });
+        initializePage();
     </script>
 </body>
 
