@@ -230,35 +230,29 @@
                     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                     const data = await response.json();
 
-                    if (data.items && data.items.length > 0) {
-                        const latestSpin = data.items[0];
+                    const showName = data.show ? data.show.title : 'Community Programming';
+                    const djName = (data.show && data.show.personas && data.show.personas.length > 0)
+                        ? data.show.personas.map(p => p.name).join(' & ')
+                        : 'KUAA';
 
-                        const showName = latestSpin.show ? latestSpin.show.title : 'Community Programming';
-                        const djName = (latestSpin.show && latestSpin.show.personas && latestSpin.show.personas.length > 0)
-                            ? latestSpin.show.personas.map(p => p.name).join(' & ')
-                            : 'KUAA';
+                    playerShow.textContent = `${showName} with ${djName}`;
+                    playerSong.textContent = data.song || 'Music Variety';
+                    playerArtist.textContent = data.artist || 'Various Artists';
 
-                        playerShow.textContent = `${showName} with ${djName}`;
-                        playerSong.textContent = latestSpin.song || 'Music Variety';
-                        playerArtist.textContent = latestSpin.artist || 'Various Artists';
+                    const imageUrl = data.image || 'https://placehold.co/200/2d3436/dfe6e9?text=KUAA';
+                    if (playerArtFg.src !== imageUrl) {
+                        playerArtFg.src = imageUrl;
+                        playerArtBg.style.backgroundImage = `url(${imageUrl})`;
 
-                        const imageUrl = latestSpin.image || 'https://placehold.co/200/2d3436/dfe6e9?text=KUAA';
-                        if (playerArtFg.src !== imageUrl) {
-                            playerArtFg.src = imageUrl;
-                            playerArtBg.style.backgroundImage = `url(${imageUrl})`;
-
-                            playerArtFg.addEventListener('load', () => {
-                                try {
-                                    const dominantColor = colorThief.getColor(playerArtFg);
-                                    const rgbColor = `rgb(${dominantColor.join(',')})`;
-                                    playerContainer.style.setProperty('--player-bg', rgbColor);
-                                } catch (e) {
-                                    playerContainer.style.setProperty('--player-bg', '#2d3436');
-                                }
-                            }, { once: true });
-                        }
-                    } else {
-                        playerContainer.style.setProperty('--player-bg', '#2d3436');
+                        playerArtFg.addEventListener('load', () => {
+                            try {
+                                const dominantColor = colorThief.getColor(playerArtFg);
+                                const rgbColor = `rgb(${dominantColor.join(',')})`;
+                                playerContainer.style.setProperty('--player-bg', rgbColor);
+                            } catch (e) {
+                                playerContainer.style.setProperty('--player-bg', '#2d3436');
+                            }
+                        }, { once: true });
                     }
                 } catch (error) {
                     console.error("Error fetching Now Playing data:", error);
@@ -327,9 +321,7 @@
                     });
 
                     for (const day in showsByDay) {
-                        showsByDay[day].sort((a, b) => {
-                            return new Date(a.start).getTime() - new Date(b.start).getTime();
-                        });
+                        showsByDay[day].sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
                     }
 
                     renderSchedule(showsByDay);
