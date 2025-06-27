@@ -58,15 +58,16 @@
                                     alt="Album Art" class="player-art-fg" crossorigin="anonymous">
                             </div>
                             <div class="player-info">
+                                <p id="player-show" class="album-name mb-1">Loading Show...</p>
                                 <p id="player-song" class="song-title mb-0">Loading Song...</p>
-                                <p id="player-artist" class="artist-name mb-1">Loading Artist...</p>
-                                <p id="player-album" class="album-name mb-3">Loading Album...</p>
+                                <p id="player-artist" class="artist-name mb-3">Loading Artist...</p>
                                 <div class="player-controls d-flex justify-content-center align-items-center">
                                     <button id="volume-btn" class="mx-3"><i id="volume-icon"
                                             class="bi bi-volume-up-fill"></i></button>
                                     <button id="play-pause-btn" class="play-btn mx-3"><i id="play-pause-icon"
                                             class="bi bi-play-fill"></i></button>
-                                    <button class="mx-3"><i class="bi bi-heart"></i></button>
+                                    <button id="player-dj-link" class="mx-3" title="View DJ Info"><i
+                                            class="bi bi-person-circle"></i></button>
                                 </div>
                             </div>
                         </div>
@@ -164,8 +165,9 @@
     <footer class="footer py-4">
         <div class="container text-center">
             <div class="mb-3">
-                <a href="https://www.instagram.com/kuaaradio/" class="fs-4 mx-2" target="_blank"><i
-                        class="bi-instagram"></i></a>
+                <a href="#" class="fs-4 mx-2"><i class="bi bi-facebook"></i></a>
+                <a href="#" class="fs-4 mx-2"><i class="bi bi-instagram"></i></a>
+                <a href="#" class="fs-4 mx-2"><i class="bi bi-twitter-x"></i></a>
             </div>
             <p>&copy; 2025 KUAA 99.9 FM. A project of the <a href="https://utaharts.org/" target="_blank">Utah Arts
                     Alliance</a>.</p>
@@ -217,11 +219,13 @@
             // --- NOW PLAYING ---
             const nowPlayingApiUrl = `/.netlify/functions/get-now-playing`;
             const playerContainer = document.getElementById('player-container');
+            const playerShow = document.getElementById('player-show');
             const playerSong = document.getElementById('player-song');
             const playerArtist = document.getElementById('player-artist');
             const playerAlbum = document.getElementById('player-album');
             const playerArtBg = document.getElementById('player-art-bg');
             const playerArtFg = document.getElementById('player-art-fg');
+            const playerDjLink = document.getElementById('player-dj-link');
 
             const fetchNowPlaying = async () => {
                 try {
@@ -232,9 +236,15 @@
                     if (data.items && data.items.length > 0) {
                         const latestSpin = data.items[0];
 
+                        const showName = latestSpin.show ? latestSpin.show.title : 'Community Programming';
+                        const djName = (latestSpin.personas && latestSpin.personas.length > 0)
+                            ? latestSpin.personas.map(p => p.name).join(' & ')
+                            : 'KUAA';
+
+                        playerShow.textContent = `${showName} with ${djName}`;
                         playerSong.textContent = latestSpin.song || 'Music Variety';
                         playerArtist.textContent = latestSpin.artist || 'Various Artists';
-                        playerAlbum.textContent = latestSpin.release || 'KUAA';
+                        playerAlbum.style.display = 'none'; // Hide the album since it's not in the design
 
                         const imageUrl = latestSpin.image || 'https://placehold.co/200/2d3436/dfe6e9?text=KUAA';
                         if (playerArtFg.src !== imageUrl) {
@@ -294,16 +304,18 @@
 
             // --- SCHEDULE ---
             const scheduleApiUrl = `/.netlify/functions/get-schedule`;
+            const visitorTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
             const formatTime = (dateStr) => {
                 const date = new Date(dateStr);
-                // Use UTC hours and minutes to prevent time zone shifts
-                let hours = date.getUTCHours();
-                const minutes = date.getUTCMinutes();
-                const ampm = hours >= 12 ? 'PM' : 'AM';
-                hours %= 12;
-                hours = hours || 12; // the hour '0' should be '12'
-                return `${hours}:${minutes < 10 ? '0' + minutes : minutes} ${ampm}`;
+                return new Intl.DateTimeFormat('en-US', {
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    timeZoneName: 'short',
+                    timeZone: visitorTimeZone
+                }).format(date);
             };
+
             const fetchSchedule = async () => {
                 try {
                     const response = await fetch(scheduleApiUrl);
