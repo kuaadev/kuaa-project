@@ -2,45 +2,33 @@ const fetch = require('node-fetch');
 
 exports.handler = async function (event, context) {
     const spinitronApiKey = process.env.SPINITRON_API_KEY;
+
     if (!spinitronApiKey) {
-        return { statusCode: 500, body: JSON.stringify({ error: "Spinitron API key is not configured." }) };
+        return {
+            statusCode: 500,
+            body: JSON.stringify({ error: "Spinitron API key is not configured." })
+        };
     }
 
-    const spinsUrl = `https://spinitron.com/api/spins?access-token=${spinitronApiKey}&station=kuaa&count=1`;
-    const showsUrl = `https://spinitron.com/api/shows?access-token=${spinitronApiKey}&station=kuaa&count=1&with=personas`;
+    // This is the single, correct endpoint to get the current song AND its associated show/DJ info.
+    const spinitronApiUrl = `https://spinitron.com/api/spins?access-token=${spinitronApiKey}&station=kuaa&count=1&with=show,personas`;
 
     try {
-        // Fetch both the current spin and the current show in parallel
-        const [spinsResponse, showsResponse] = await Promise.all([
-            fetch(spinsUrl),
-            fetch(showsUrl)
-        ]);
+        const response = await fetch(spinitronApiUrl);
 
-        if (!spinsResponse.ok || !showsResponse.ok) {
-            return { statusCode: 500, body: JSON.stringify({ error: "Failed to fetch data from Spinitron." }) };
+        if (!response.ok) {
+            return {
+                statusCode: response.status,
+                body: JSON.stringify({ error: `Spinitron API error: ${response.statusText}` })
+            };
         }
 
-        const spinsData = await spinsResponse.json();
-        const showsData = await showsResponse.json();
+        const data = await response.json();
 
-        const latestSpin = (spinsData.items && spinsData.items.length > 0) ? spinsData.items[0] : {};
-        const currentShow = (showsData.items && showsData.items.length > 0) ? showsData.items[0] : {};
-
-        // Combine the data, giving preference to the show data for title and DJ
-        const responseData = {
-            song: latestSpin.song || "Music Variety",
-            artist: latestSpin.artist || "Various Artists",
-            release: latestSpin.release || "KUAA",
-            image: latestSpin.image,
-            show: {
-                title: currentShow.title || "Community Programming",
-                personas: currentShow.personas || []
-            }
-        };
-
+        // The data is now passed directly to the frontend, which will handle the logic.
         return {
             statusCode: 200,
-            body: JSON.stringify(responseData)
+            body: JSON.stringify(data)
         };
     } catch (error) {
         console.error("Error in get-now-playing function:", error);
