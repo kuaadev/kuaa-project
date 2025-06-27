@@ -14,7 +14,6 @@
 </head>
 
 <body>
-    <!-- Hidden Audio Player -->
     <audio id="audio-player" preload="auto">
         <source src="https://stream.xmission.com/kuaa" type="audio/mpeg">
     </audio>
@@ -161,24 +160,51 @@
         document.addEventListener('DOMContentLoaded', () => {
             const colorThief = new ColorThief();
 
+            // --- PLAYER CONTROLS ---
             const audioPlayer = document.getElementById('audio-player');
             const playPauseBtn = document.getElementById('play-pause-btn');
             const navPlayBtn = document.getElementById('nav-play-btn');
             const volumeBtn = document.getElementById('volume-btn');
 
-            function togglePlay() { /* ... */ }
-            function updatePlayIcons() { /* ... */ }
-            function toggleMute() { /* ... */ }
+            function togglePlay() {
+                if (audioPlayer.paused) {
+                    audioPlayer.play().catch(e => console.error("Play initiation failed:", e));
+                } else {
+                    audioPlayer.pause();
+                }
+            }
+
+            function updatePlayIcons() {
+                const isPlaying = !audioPlayer.paused;
+                const playPauseIcon = document.getElementById('play-pause-icon');
+                const navPlayIcon = document.getElementById('nav-play-icon');
+                playPauseIcon.className = isPlaying ? 'bi bi-pause-fill' : 'bi bi-play-fill';
+                navPlayIcon.className = isPlaying ? 'bi bi-pause-fill' : 'bi bi-play-fill';
+            }
+
+            function toggleMute() {
+                audioPlayer.muted = !audioPlayer.muted;
+                const volumeIcon = document.getElementById('volume-icon');
+                volumeIcon.className = audioPlayer.muted || audioPlayer.volume === 0 ? 'bi bi-volume-mute-fill' : 'bi bi-volume-up-fill';
+            }
 
             playPauseBtn.addEventListener('click', togglePlay);
             navPlayBtn.addEventListener('click', togglePlay);
             volumeBtn.addEventListener('click', toggleMute);
             audioPlayer.addEventListener('play', updatePlayIcons);
             audioPlayer.addEventListener('pause', updatePlayIcons);
-            audioPlayer.addEventListener('volumechange', () => { /* ... */ });
+            audioPlayer.addEventListener('volumechange', () => {
+                const volumeIcon = document.getElementById('volume-icon');
+                volumeIcon.className = audioPlayer.muted || audioPlayer.volume === 0 ? 'bi bi-volume-mute-fill' : 'bi bi-volume-up-fill';
+            });
 
-            function getContrastYIQ(rgb) { /* ... */ }
+            // --- HIGH CONTRAST TEXT LOGIC ---
+            function getContrastYIQ(rgb) {
+                const yiq = ((rgb[0] * 299) + (rgb[1] * 587) + (rgb[2] * 114)) / 1000;
+                return (yiq >= 128) ? '#2d3436' : '#dfe6e9'; // Return dark or light color
+            }
 
+            // --- NOW PLAYING ---
             const nowPlayingApiUrl = `/.netlify/functions/get-now-playing`;
             const playerContainer = document.getElementById('player-container');
             const playerShow = document.getElementById('player-show');
@@ -187,18 +213,117 @@
             const playerArtBg = document.getElementById('player-art-bg');
             const playerArtFg = document.getElementById('player-art-fg');
 
-            const fetchNowPlaying = async () => { /* ... */ };
+            const fetchNowPlaying = async () => {
+                try {
+                    const response = await fetch(nowPlayingApiUrl);
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    const data = await response.json();
 
+                    const showName = data.show ? data.show.title : 'Community Programming';
+                    const djName = (data.show && data.show.personas && data.show.personas.length > 0)
+                        ? data.show.personas.map(p => p.name).join(' & ')
+                        : 'KUAA';
+
+                    playerShow.textContent = `${showName} with ${djName}`;
+                    playerSong.textContent = data.song || 'Music Variety';
+                    playerArtist.textContent = data.artist || 'Various Artists';
+
+                    const imageUrl = data.image || 'https://placehold.co/280/2d3436/dfe6e9?text=KUAA';
+                    if (playerArtFg.src !== imageUrl) {
+                        playerArtFg.src = imageUrl;
+                        playerArtBg.style.backgroundImage = `url(${imageUrl})`;
+
+                        playerArtFg.addEventListener('load', () => {
+                            try {
+                                const dominantColor = colorThief.getColor(playerArtFg);
+                                const textColor = getContrastYIQ(dominantColor);
+                                playerContainer.style.setProperty('--player-bg', `rgb(${dominantColor.join(',')})`);
+                                playerContainer.style.setProperty('--player-text', textColor);
+                                playerContainer.style.setProperty('--player-text-muted', textColor === '#dfe6e9' ? '#b2bec3' : '#636e72');
+                            } catch (e) {
+                                playerContainer.style.setProperty('--player-bg', '#2d3436');
+                                playerContainer.style.setProperty('--player-text', '#dfe6e9');
+                                playerContainer.style.setProperty('--player-text-muted', '#b2bec3');
+                            }
+                        }, { once: true });
+                    }
+                } catch (error) {
+                    console.error("Error fetching Now Playing data:", error);
+                }
+            };
+
+            // --- SCHEDULE ---
             const scheduleApiUrl = `/.netlify/functions/get-schedule`;
             const visitorTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-            const formatTime = (dateStr) => { /* ... */ };
-            const fetchSchedule = async () => { /* ... */ };
-            const renderSchedule = (showsByDay) => { /* ... */ };
+            const formatTime = (dateStr) => {
+                const date = new Date(dateStr);
+                return new Intl.DateTimeFormat('en-US', {
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    timeZone: visitorTimeZone
+                }).format(date);
+            };
+            const fetchSchedule = async () => {
+                try {
+                    const response = await fetch(scheduleApiUrl);
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    const scheduleData = await response.json();
+                    const shows = scheduleData.items;
 
+                    const showsByDay = { 0: [], 1: [], 2: [], 3: [], 4: [], 5: [], 6: [] };
+                    shows.forEach(show => {
+                        const showDate = new Date(show.start);
+                        const dayOfWeek = showDate.getDay();
+                        showsByDay[dayOfWeek].push(show);
+                    });
+
+                    for (const day in showsByDay) {
+                        showsByDay[day].sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
+                    }
+
+                    renderSchedule(showsByDay);
+
+                } catch (error) {
+                    console.error("Error fetching schedule:", error);
+                }
+            };
+            const renderSchedule = (showsByDay) => {
+                const dayMap = { 0: 'sunday', 1: 'monday', 2: 'tuesday', 3: 'wednesday', 4: 'thursday', 5: 'friday', 6: 'saturday' };
+                for (const dayIndex in dayMap) {
+                    const dayName = dayMap[dayIndex];
+                    const container = document.getElementById(dayName);
+                    const dayShows = showsByDay[dayIndex];
+
+                    if (!container) continue;
+
+                    if (dayShows.length === 0) {
+                        container.innerHTML = '<p class="text-center p-3">No shows scheduled for today.</p>';
+                    } else {
+                        let tableHTML = `<table class="table table-striped table-hover">
+                            <thead class="table-dark"><tr><th>Time</th><th>Show</th><th>DJ/Host</th></tr></thead><tbody>`;
+                        dayShows.forEach(show => {
+                            const djName = (show.personas && show.personas.length > 0)
+                                ? show.personas.map(p => p.name).join(' & ')
+                                : 'KUAA';
+
+                            tableHTML += `<tr>
+                                <td>${formatTime(show.start)} - ${formatTime(show.end)}</td>
+                                <td>${show.title || 'Untitled Show'}</td>
+                                <td>${djName}</td>
+                            </tr>`;
+                        });
+                        tableHTML += `</tbody></table>`;
+                        container.innerHTML = tableHTML;
+                    }
+                }
+            };
+
+            // --- INITIALIZE ---
             fetchNowPlaying();
             fetchSchedule();
             setInterval(fetchNowPlaying, 20000);
 
+            // Set Today's Tab as Active
             const todayIndex = new Date().getDay();
             const dayMap = { 0: 'sunday', 1: 'monday', 2: 'tuesday', 3: 'wednesday', 4: 'thursday', 5: 'friday', 6: 'saturday' };
             const todayTab = document.getElementById(`${dayMap[todayIndex]}-tab`);
@@ -207,6 +332,7 @@
                 tab.show();
             }
 
+            // --- SMOOTH SCROLL ---
             document.querySelectorAll('a[href^="#"]').forEach(anchor => {
                 anchor.addEventListener('click', function (e) {
                     if (this.getAttribute('data-bs-toggle') === 'tab' || this.id === 'nav-play-btn') return;
