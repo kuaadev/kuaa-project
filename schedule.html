@@ -24,7 +24,7 @@
                         <div id="on-air-indicator" class="on-air-indicator">
                             <span class="time"></span>
                         </div>
-                        <div class="col-12 text-center p-5">
+                        <div id="timeline-spinner" class="col-12 text-center p-5">
                             <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
                                 <span class="visually-hidden">Loading...</span>
                             </div>
@@ -74,7 +74,7 @@
             const timeline = document.getElementById('timeline');
             const onAirIndicator = document.getElementById('on-air-indicator');
             const scheduleApiUrl = `/.netlify/functions/get-schedule`;
-            const pixelsPerHour = 60; // 60px = 1 hour
+            const pixelsPerHour = 60;
 
             function buildTimeRuler() {
                 for (let i = 0; i < 24; i++) {
@@ -101,8 +101,8 @@
                     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                     const scheduleData = await response.json();
 
-                    timeline.innerHTML = ''; // Clear spinner
-                    timeline.appendChild(onAirIndicator); // Re-add indicator
+                    const spinner = document.getElementById('timeline-spinner');
+                    if (spinner) spinner.remove();
 
                     const shows = scheduleData.data || [];
                     const included = scheduleData.included || [];
@@ -116,12 +116,12 @@
 
                         const startMinutes = start.getHours() * 60 + start.getMinutes();
                         let endMinutes = end.getHours() * 60 + end.getMinutes();
-                        if (endMinutes === 0) endMinutes = 24 * 60; // Handle shows ending at midnight
+                        if (endMinutes === 0) endMinutes = 24 * 60;
 
                         const top = (startMinutes / 60) * pixelsPerHour;
                         let height = ((endMinutes - startMinutes) / 60) * pixelsPerHour;
 
-                        if (height <= 0) return; // Don't render invalid shows
+                        if (height <= 0) return;
 
                         let djName = 'KUAA';
                         if (show.relationships.personas && show.relationships.personas.data.length > 0) {
