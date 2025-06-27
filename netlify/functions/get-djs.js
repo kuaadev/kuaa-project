@@ -17,58 +17,58 @@ exports.handler = async function (event, context) {
 
         const shows = scheduleData.data || [];
         const included = scheduleData.included || [];
-        const uniqueDjs = new Map();
         const now = new Date();
 
-        // Step 1: Extract all unique DJs from the schedule
+        // Step 1: Create a lookup map of all personas from the 'included' array.
+        const allPersonasMap = new Map();
+        included.forEach(item => {
+            if (item.type === 'personas') {
+                allPersonasMap.set(item.id, item);
+            }
+        });
+
+        // Step 2: Create a set of all persona IDs that are actually hosting a show.
+        const activePersonaIds = new Set();
         shows.forEach(show => {
-            if (show.relationships.personas && show.relationships.personas.data.length > 0) {
-                show.relationships.personas.data.forEach(personaRef => {
-                    if (!uniqueDjs.has(personaRef.id)) {
-                        const persona = included.find(inc => inc.type === 'personas' && inc.id === personaRef.id);
-                        if (persona) {
-                            uniqueDjs.set(persona.id, {
-                                id: persona.id,
-                                name: persona.attributes.name,
-                                bio: persona.attributes.bio,
-                                image: persona.attributes.image,
-                                nextShowTime: null, // Initialize next show time
-                                onAir: false
-                            });
-                        }
-                    }
+            if (show.relationships.personas && show.relationships.personas.data) {
+                show.relationships.personas.data.forEach(pRef => activePersonaIds.add(pRef.id));
+            }
+        });
+
+        // Step 3: Build the final list of unique, active DJs.
+        const djs = [];
+        activePersonaIds.forEach(id => {
+            const persona = allPersonasMap.get(id);
+            if (persona) {
+                djs.push({
+                    id: persona.id,
+                    name: persona.attributes.name,
+                    bio: persona.attributes.bio,
+                    image: persona.attributes.image,
+                    nextShowTime: null,
+                    onAir: false
                 });
             }
         });
 
-        // Step 2: Find the "On Air" show and the "Next Up" time for each DJ
-        shows.forEach(show => {
-            const startTime = new Date(show.attributes.start);
-            const endTime = new Date(show.attributes.end);
-
-            if (show.relationships.personas && show.relationships.personas.data.length > 0) {
-                show.relationships.personas.data.forEach(personaRef => {
-                    const dj = uniqueDjs.get(personaRef.id);
-                    if (!dj) return;
-
-                    // Check if this show is currently on air
+        // Step 4: Find the "On Air" and "Next Up" status for each active DJ.
+        djs.forEach(dj => {
+            shows.forEach(show => {
+                const personaIdsInShow = (show.relationships.personas.data || []).map(p => p.id);
+                if (personaIdsInShow.includes(dj.id)) {
+                    const startTime = new Date(show.attributes.start);
+                    const endTime = new Date(show.attributes.end);
                     if (now >= startTime && now < endTime) {
                         dj.onAir = true;
-                        dj.nextShowTime = startTime; // The current show is the "next" for sorting purposes
-                    }
-                    // Find the soonest upcoming show for this DJ
-                    else if (startTime > now && (!dj.nextShowTime || startTime < dj.nextShowTime)) {
+                        dj.nextShowTime = startTime;
+                    } else if (startTime > now && (!dj.nextShowTime || startTime < dj.nextShowTime)) {
                         dj.nextShowTime = startTime;
                     }
-                });
-            }
+                }
+            });
         });
 
-        const djsArray = Array.from(uniqueDjs.values());
-
-        const responseData = {
-            items: djsArray
-        };
+        const responseData = { items: djs };
 
         return {
             statusCode: 200,
